@@ -1,4 +1,4 @@
-package ParallelBoat;
+package parallelBOAT;
 
 public class Article {
 

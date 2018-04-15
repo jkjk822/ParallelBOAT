@@ -1,3 +1,3 @@
-package ParallelBoat;
+package parallelBOAT;
 
 enum Popularity {low, high};
