@@ -4,12 +4,13 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class Driver {
 
     public static void main(String [] args) {
 
-        Article[] rawData = new Article[39797];
+        Article[] rawData = new Article[39644];
         BufferedReader br = null;
         String file = "./resources/OnlineNewsPopularity.csv";
         String line = "";
@@ -40,9 +41,10 @@ public class Driver {
             }
         }
 
-        System.out.println(rawData[0].getData()[Attribute.weekday_is_friday.ordinal()].toString());
-        System.out.println(rawData[0].isWeekday_is_monday());
-
-
+//        System.out.println(rawData[0].getData()[Attribute.weekday_is_friday.ordinal()].toString());
+//        System.out.println(rawData[0].isWeekday_is_monday());
+        System.out.println(rawData[0].getShares());
+        Arrays.sort(rawData, new CompareByAttribute(Attribute.shares));
+        System.out.println(rawData[0].getShares());
     }
 }
