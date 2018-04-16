@@ -40,5 +40,9 @@ public class Driver {
             }
         }
 
+        System.out.println(rawData[0].isWeekday_is_friday());
+        System.out.println(rawData[0].isWeekday_is_monday());
+
+
     }
 }

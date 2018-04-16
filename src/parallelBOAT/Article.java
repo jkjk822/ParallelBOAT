@@ -80,12 +80,12 @@ public class Article {
         this.num_videos = Double.valueOf(args[10]).intValue();
         this.average_token_length = Double.parseDouble(args[11]);
         this.num_keywords = Double.valueOf(args[12]).intValue();
-        this.data_channel_is_lifestyle = Boolean.parseBoolean(args[13]);
-        this.data_channel_is_entertainment = Boolean.parseBoolean(args[14]);
-        this.data_channel_is_bus = Boolean.parseBoolean(args[15]);
-        this.data_channel_is_socmed = Boolean.parseBoolean(args[16]);
-        this.data_channel_is_tech = Boolean.parseBoolean(args[17]);
-        this.data_channel_is_world = Boolean.parseBoolean(args[18]);
+        this.data_channel_is_lifestyle = parseBoolean(args[13]);
+        this.data_channel_is_entertainment = parseBoolean(args[14]);
+        this.data_channel_is_bus = parseBoolean(args[15]);
+        this.data_channel_is_socmed = parseBoolean(args[16]);
+        this.data_channel_is_tech = parseBoolean(args[17]);
+        this.data_channel_is_world = parseBoolean(args[18]);
         this.kw_min_min = Double.valueOf(args[19]).intValue();
         this.kw_max_min = Double.valueOf(args[20]).intValue();
         this.kw_avg_min = Double.parseDouble(args[21]);
@@ -98,14 +98,14 @@ public class Article {
         this.self_reference_min_shares = Double.valueOf(args[28]).intValue();
         this.self_reference_max_shares = Double.valueOf(args[29]).intValue();
         this.self_reference_avg_sharess = Double.parseDouble(args[30]);
-        this.weekday_is_monday = Boolean.parseBoolean(args[31]);
-        this.weekday_is_tuesday = Boolean.parseBoolean(args[32]);
-        this.weekday_is_wednesday = Boolean.parseBoolean(args[33]);
-        this.weekday_is_thursday = Boolean.parseBoolean(args[34]);
-        this.weekday_is_friday = Boolean.parseBoolean(args[35]);
-        this.weekday_is_saturday = Boolean.parseBoolean(args[36]);
-        this.weekday_is_sunday = Boolean.parseBoolean(args[37]);
-        this.is_weekend = Boolean.parseBoolean(args[38]);
+        this.weekday_is_monday = parseBoolean(args[31]);
+        this.weekday_is_tuesday = parseBoolean(args[32]);
+        this.weekday_is_wednesday = parseBoolean(args[33]);
+        this.weekday_is_thursday = parseBoolean(args[34]);
+        this.weekday_is_friday = parseBoolean(args[35]);
+        this.weekday_is_saturday = parseBoolean(args[36]);
+        this.weekday_is_sunday = parseBoolean(args[37]);
+        this.is_weekend = parseBoolean(args[38]);
         this.LDA_00 = Double.parseDouble(args[39]);
         this.LDA_01 = Double.parseDouble(args[40]);
         this.LDA_02 = Double.parseDouble(args[41]);
@@ -128,6 +128,10 @@ public class Article {
         this.abs_title_subjectivity = Double.parseDouble(args[58]);
         this.abs_title_sentiment_polarity = Double.parseDouble(args[59]);
         this.shares = Double.valueOf(args[60]).intValue();
+    }
+
+    private boolean parseBoolean(String bool) {
+        return (bool.equals("1.0"));
     }
 
     public Popularity getPopularity() {
