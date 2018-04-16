@@ -140,6 +140,72 @@ public class Article {
         return (bool.equals("1.0"));
     }
 
+    public Object[] getData() {
+        Object[] collect = new Object[61];
+        collect[0] = this.url;
+        collect[1] = this.timeDelta;
+        collect[2] = this.n_tokens_title;
+        collect[3] = this.n_tokens_content;
+        collect[4] = this.n_unique_tokens;
+        collect[5] = this.n_non_stop_words;
+        collect[6] = this.n_non_stop_unique_tokens;
+        collect[7] = this.num_hrefs;
+        collect[8] = this.num_self_hrefs;
+        collect[9] = this.num_imgs;
+        collect[10] = this.num_videos;
+        collect[11] = this.average_token_length;
+        collect[12] = this.num_keywords;
+        collect[13] = this.data_channel_is_lifestyle;
+        collect[14] = this.data_channel_is_entertainment;
+        collect[15] = this.data_channel_is_bus;
+        collect[16] = this.data_channel_is_socmed;
+        collect[17] = this.data_channel_is_tech;
+        collect[18] = this.data_channel_is_world;
+        collect[19] = this.kw_min_min;
+        collect[20] = this.kw_max_min;
+        collect[21] = this.kw_avg_min;
+        collect[22] = this.kw_min_max;
+        collect[23] = this.kw_max_max;
+        collect[24] = this.kw_avg_max;
+        collect[25] = this.kw_min_avg;
+        collect[26] = this.kw_max_avg;
+        collect[27] = this.kw_avg_avg;
+        collect[28] = this.self_reference_min_shares;
+        collect[29] = this.self_reference_max_shares;
+        collect[30] = this.self_reference_avg_sharess;
+        collect[31] = this.weekday_is_monday;
+        collect[32] = this.weekday_is_tuesday;
+        collect[33] = this.weekday_is_wednesday;
+        collect[34] = this.weekday_is_thursday;
+        collect[35] = this.weekday_is_friday;
+        collect[36] = this.weekday_is_saturday;
+        collect[37] = this.weekday_is_sunday;
+        collect[38] = this.is_weekend;
+        collect[39] = this.LDA_00;
+        collect[40] = this.LDA_01;
+        collect[41] = this.LDA_02;
+        collect[42] = this.LDA_03;
+        collect[43] = this.LDA_04;
+        collect[44] = this.global_subjectivity;
+        collect[45] = this.global_sentiment_polarity;
+        collect[46] = this.global_rate_positive_words;
+        collect[47] = this.global_rate_negative_words;
+        collect[48] = this.rate_positive_words;
+        collect[49] = this.rate_negative_words;
+        collect[50] = this.avg_positive_polarity;
+        collect[51] = this.min_positive_polarity;
+        collect[52] = this.max_positive_polarity;
+        collect[53] = this.avg_negative_polarity;
+        collect[54] = this.min_negative_polarity;
+        collect[55] = this.max_negative_polarity;
+        collect[56] = this.title_subjectivity;
+        collect[57] = this.title_sentiment_polarity;
+        collect[58] = this.abs_title_subjectivity;
+        collect[59] = this.abs_title_sentiment_polarity;
+        collect[60] = this.shares;
+        return collect;
+    }
+
     public Popularity getPopularity() {
         return popularity;
     }

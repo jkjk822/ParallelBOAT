@@ -40,7 +40,7 @@ public class Driver {
             }
         }
 
-        System.out.println(rawData[0].isWeekday_is_friday());
+        System.out.println(rawData[0].getData()[Attribute.weekday_is_friday.ordinal()].toString());
         System.out.println(rawData[0].isWeekday_is_monday());
 
 
