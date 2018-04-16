@@ -1,17 +1,8 @@
 package parallelBOAT.tree;
 
 public abstract class Node {
-    protected Node parent;
     protected Node leftChild;
     protected Node rightChild;
-
-    public Node getParent() {
-        return parent;
-    }
-
-    public void setParent(Node parent) {
-        this.parent = parent;
-    }
 
     public Node getLeftChild() {
         return leftChild;
@@ -26,6 +17,16 @@ public abstract class Node {
     }
 
     public void setRightChild(Node rightChild) {
+        this.rightChild = rightChild;
+    }
+
+    public Node(){
+        this.leftChild = null;
+        this.rightChild = null;
+    }
+
+    public Node(Node leftChild, Node rightChild) {
+        this.leftChild = leftChild;
         this.rightChild = rightChild;
     }
 }
