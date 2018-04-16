@@ -128,6 +128,12 @@ public class Article {
         this.abs_title_subjectivity = Double.parseDouble(args[58]);
         this.abs_title_sentiment_polarity = Double.parseDouble(args[59]);
         this.shares = Double.valueOf(args[60]).intValue();
+        if(this.shares<1000)
+            this.popularity = Popularity.LOW;
+        else if(this.shares<10000)
+            this.popularity = Popularity.HIGH;
+        else
+            this.popularity = Popularity.VIRAL;
     }
 
     private boolean parseBoolean(String bool) {
