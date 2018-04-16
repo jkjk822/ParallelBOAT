@@ -8,6 +8,10 @@ public class LeafNode extends Node {
 
     private Popularity classLabel;
 
+    public LeafNode(LeafNode n){
+        classLabel = n.classLabel;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

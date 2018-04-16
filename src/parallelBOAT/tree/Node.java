@@ -20,7 +20,7 @@ public abstract class Node {
         this.rightChild = rightChild;
     }
 
-    public Node(){
+    Node(){
         this.leftChild = null;
         this.rightChild = null;
     }
