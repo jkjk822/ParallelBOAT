@@ -8,6 +8,10 @@ public class LeafNode extends Node {
 
     private Popularity classLabel;
 
+    public LeafNode (Popularity p) {
+        classLabel = p;
+    }
+
     public LeafNode(LeafNode n){
         classLabel = n.classLabel;
     }

@@ -43,8 +43,15 @@ public class Driver {
 
 //        System.out.println(rawData[0].getData()[Attribute.weekday_is_friday.getIndex()].toString());
 //        System.out.println(rawData[0].isWeekday_is_monday());
+
         System.out.println(rawData[0].getShares());
-        Arrays.sort(rawData, new CompareByAttribute(Attribute.shares));
+//        Arrays.sort(rawData, new CompareByAttribute(Attribute.shares));
         System.out.println(rawData[0].getShares());
+
+
+        DecisionTree dt = new DecisionTree();
+        Article[] newdata = Arrays.copyOfRange(rawData, 0, 3);
+//        System.out.println(dt.getMajorityClass(newdata));
+
     }
 }

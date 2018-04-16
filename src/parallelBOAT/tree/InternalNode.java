@@ -9,6 +9,11 @@ public class InternalNode<T> extends Node{
     protected Attribute splitAttribute;
     protected T splitPoint;
 
+    public InternalNode(Attribute splitAttribute, T splitPoint) {
+        this.splitAttribute = splitAttribute;
+        this.splitPoint = splitPoint;
+    }
+
     public InternalNode(InternalNode<T> n){
         splitAttribute = n.splitAttribute;
         splitPoint = n.splitPoint;
