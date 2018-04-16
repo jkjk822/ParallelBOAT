@@ -8,11 +8,11 @@ public class CompareByAttribute implements Comparator<Article>{
     private static int index = 0;
 
     public CompareByAttribute(Attribute attribute) {
-        this.index = attribute.ordinal();
+        this.index = attribute.getIndex();
     }
 
     public CompareByAttribute setAttribute(Attribute attribute) {
-        this.index = attribute.ordinal();
+        this.index = attribute.getIndex();
         return this;
     }
 

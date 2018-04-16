@@ -41,7 +41,7 @@ public class Driver {
             }
         }
 
-//        System.out.println(rawData[0].getData()[Attribute.weekday_is_friday.ordinal()].toString());
+//        System.out.println(rawData[0].getData()[Attribute.weekday_is_friday.getIndex()].toString());
 //        System.out.println(rawData[0].isWeekday_is_monday());
         System.out.println(rawData[0].getShares());
         Arrays.sort(rawData, new CompareByAttribute(Attribute.shares));
