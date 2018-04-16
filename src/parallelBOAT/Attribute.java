@@ -62,8 +62,7 @@ public enum Attribute {
     abs_title_subjectivity,
     abs_title_sentiment_polarity,
     shares
-<<<<<<< HEAD
-=======
+
 
 //    private final int index;
 //
@@ -74,5 +73,5 @@ public enum Attribute {
 //    public int getIndex() {
 //        return index;
 //    }
->>>>>>> 3adca688e25af1db0f1c4633d46b6ce08f198b6a
+
 }
