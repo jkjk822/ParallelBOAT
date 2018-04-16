@@ -44,4 +44,10 @@ public class BootStrap {
         //compute confidence interval
         return new BootStrapNode();
     }
+
+    private static double computeConfidence(double[] data, double conf){
+        double mean = Arrays.stream(data).sum()/data.length;
+        double std = Math.sqrt(Arrays.stream(data).map(x->(x-mean)*(x-mean)).sum()/data.length);
+        return conf*std/Math.sqrt(data.length);
+    }
 }
