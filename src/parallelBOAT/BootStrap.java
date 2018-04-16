@@ -57,9 +57,9 @@ public class BootStrap {
     }
 
     private static InternalNode combine(InternalNode[] trees){
-        if(trees[0].getSplitPoint() instanceof Boolean)
-            return new InternalNode<Boolean>(trees[0]);
-        double[] splitPoints = Arrays.stream(trees).mapToDouble(n -> (double) n.getSplitPoint()).toArray();
+        if(trees[0].getSplitPoint() == Double.NaN) //boolean split
+            return new InternalNode(trees[0]);
+        double[] splitPoints = Arrays.stream(trees).mapToDouble(InternalNode::getSplitPoint).toArray();
         double confLevel = 1.96; //95% confidence
         return new ConfidenceNode(trees[0], computeConfidence(splitPoints, confLevel));
     }

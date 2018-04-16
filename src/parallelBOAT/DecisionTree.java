@@ -47,7 +47,7 @@ public class DecisionTree {
         ArrayList<Attribute> rightAttributes = new ArrayList<Attribute>(attributes);
 
         // Build internal Node
-        InternalNode<Double> node = new InternalNode<>(bestSplit.getKey(), bestSplit.getValue());
+        InternalNode node = new InternalNode(bestSplit.getKey(), bestSplit.getValue());
 
         if(left.isEmpty())
             node.setLeftChild(new LeafNode(getMajorityClass(data)));
