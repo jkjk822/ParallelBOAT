@@ -10,6 +10,8 @@ public class Driver {
 
     public static ImpurityFunction imp;
 
+
+    //TODO: make Double.NaN a constant
     public static void main(String [] args) {
 
         Article[] rawData = new Article[39644];
@@ -43,7 +45,7 @@ public class Driver {
             }
         }
 
-
+//        DecisionTree.generateDecisionTree(rawData);
         BootStrap.generateBOATTree(rawData, 10, 1000);
 
 
@@ -85,14 +87,12 @@ public class Driver {
                 for (Article a : data) {
                     count[a.getPopularity().ordinal()]++;
                 }
-
                 // Get each p^2
                 double sum = 0;
                 for(int c : count){
                     double d = c;
                     sum += (d / data.length)*(d / data.length);
                 }
-
                 // Return 1 - sum of p^2
                 return (1 - sum)*data.length;
 

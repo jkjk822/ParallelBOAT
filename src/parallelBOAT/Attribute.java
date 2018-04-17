@@ -65,7 +65,7 @@ public enum Attribute {
 
     private final int index;
 
-    private Attribute(int index) {
+    Attribute(int index) {
         this.index = index;
     }
 
