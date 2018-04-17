@@ -93,7 +93,7 @@ public class Driver {
 
             }
         };
-        
+
         //if input = entropy
     }
 

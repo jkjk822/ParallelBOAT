@@ -10,9 +10,15 @@ import java.util.function.Predicate;
 
 public class DecisionTree {
 
-    public DecisionTree() {}
+    public static Node generateDecisionTree(Article[] data) {
+        List<Attribute> attributes = Arrays.asList(Attribute.values());
+        attributes.remove(0);
+        attributes.remove(1);
+        attributes.remove(attributes.size()-1);
+        return generateDecisionTree(data, new ArrayList<>(attributes),0);
+    }
 
-    public Node generateDecisionTree(Article[] data, ArrayList<Attribute> attributes, int level) {
+    public static Node generateDecisionTree(Article[] data, ArrayList<Attribute> attributes, int level) {
 //        System.out.println("LEVEL : " + level);
         // If all articles are same class -> return leaf node
         if(getClass(data) != Popularity.MULTI) {
@@ -50,7 +56,7 @@ public class DecisionTree {
         return node;
     }
 
-    private Popularity getClass(Article [] data) {
+    private static Popularity getClass(Article [] data) {
         Popularity p = data[0].getPopularity();
         if(Arrays.stream(data).map(Article::getPopularity).allMatch(Predicate.isEqual(p)))
             return p;
@@ -58,7 +64,7 @@ public class DecisionTree {
             return Popularity.MULTI;
     }
 
-    private Popularity getMajorityClass(Article [] data) {
+    private static Popularity getMajorityClass(Article [] data) {
 
         HashMap<Popularity, Integer> count = new HashMap<>();
 
@@ -71,7 +77,7 @@ public class DecisionTree {
 
     }
 
-    private void splitData(ArrayList<Article> left, ArrayList<Article> right, Article[] data, Attribute attribute, Double splitPoint) {
+    private static void splitData(ArrayList<Article> left, ArrayList<Article> right, Article[] data, Attribute attribute, Double splitPoint) {
         Boolean isBool = data[0].getData()[attribute.getIndex()] instanceof Boolean;
         for(Article a : data) {
             if(isBool) {
@@ -88,7 +94,7 @@ public class DecisionTree {
         }
     }
 
-    private Pair<Attribute, Double> chooseBestAttribute(Article[] data, ArrayList<Attribute> attributes) {
+    private static Pair<Attribute, Double> chooseBestAttribute(Article[] data, ArrayList<Attribute> attributes) {
         Attribute bestAttribute = attributes.get(0);
         Double bestSplit = 0.0;
         Double bestGini = -1.0;
@@ -105,7 +111,7 @@ public class DecisionTree {
         return new Pair<>(bestAttribute, bestSplit);
     }
 
-    private Pair<Double, Double> bestGiniSplit(Article [] data, Attribute attribute) {
+    private static Pair<Double, Double> bestGiniSplit(Article [] data, Attribute attribute) {
         // If boolean we already know best split point
         if(data[0].getData()[attribute.getIndex()] instanceof Boolean) {
             ArrayList<Article> left = new ArrayList<>();

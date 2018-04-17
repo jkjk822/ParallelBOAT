@@ -1,19 +1,13 @@
 package parallelBOAT;
 
 import java.util.Comparator;
-import java.util.Objects;
 
 public class CompareByAttribute implements Comparator<Article>{
 
-    private static int index = 0;
+    private int index;
 
     public CompareByAttribute(Attribute attribute) {
         this.index = attribute.getIndex();
-    }
-
-    public CompareByAttribute setAttribute(Attribute attribute) {
-        this.index = attribute.getIndex();
-        return this;
     }
 
     public int compare(Article a, Article b) {
