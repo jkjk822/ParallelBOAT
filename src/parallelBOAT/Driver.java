@@ -1,9 +1,6 @@
 package parallelBOAT;
 
-import parallelBOAT.tree.Node;
-
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -46,7 +43,7 @@ public class Driver {
             }
         }
 
-        BootStrap.buildBootStrapTree(rawData, 10, 1000);
+        BootStrap.rowRowRowYourBOAT(rawData, 10, 1000);
 
 
 

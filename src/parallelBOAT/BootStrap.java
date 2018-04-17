@@ -24,7 +24,7 @@ public class BootStrap {
         return sample;
     }
 
-    public static Node buildBootStrapTree(Article[] data, int width, int depth){
+    public static Node rowRowRowYourBOAT(Article[] data, int width, int depth){
         Node[] trees = new Node[width];
         for(int i = 0; i < width; i++)
             trees[i] = DecisionTree.generateDecisionTree(sample(data, depth));
@@ -78,8 +78,8 @@ public class BootStrap {
     }
 
     private static double computeConfidence(double[] values, double conf){
-        double mean = Arrays.stream(values).sum()/values.length;
-        double std = Math.sqrt(Arrays.stream(values).map(x -> (x-mean)*(x-mean)).sum()/values.length);
+        double mean = Arrays.stream(values).sum() / values.length;
+        double std = Math.sqrt(Arrays.stream(values).map(x -> (x - mean)*(x - mean)).sum() / values.length);
         return conf*std/Math.sqrt(values.length);
     }
 }
