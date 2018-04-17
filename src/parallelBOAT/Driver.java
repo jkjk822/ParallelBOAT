@@ -44,7 +44,7 @@ public class Driver {
         }
 
 
-        BootStrap.generateBOATTree(rawData, 1, 1000);
+        BootStrap.generateBOATTree(rawData, 10, 1000);
 
 
 
@@ -79,17 +79,18 @@ public class Driver {
             }
 
             private double giniIndex(Article[] data) {
-                HashMap<Popularity, Integer> count = new HashMap<>();
+                int[] count =  new int[Popularity.values().length];
 
                 // Count up occurrences of each class
                 for (Article a : data) {
-                    count.put(a.getPopularity(), count.getOrDefault(a.getPopularity(),0) + 1);
+                    count[a.getPopularity().ordinal()]++;
                 }
 
                 // Get each p^2
                 double sum = 0;
-                for(Map.Entry<Popularity, Integer> pair : count.entrySet()){
-                    sum += (pair.getValue() / (double)data.length)*(pair.getValue() / (double)data.length);
+                for(int c : count){
+                    double d = c;
+                    sum += (d / data.length)*(d / data.length);
                 }
 
                 // Return 1 - sum of p^2
