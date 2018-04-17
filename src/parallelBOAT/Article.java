@@ -2,6 +2,8 @@ package parallelBOAT;
 
 public class Article {
 
+    private Object[] collect = new Object[0];
+
     private Popularity popularity;
     private String url;
     private int timeDelta;
@@ -141,7 +143,9 @@ public class Article {
     }
 
     public Object[] getData() {
-        Object[] collect = new Object[61];
+        if(collect.length!=0)
+            return collect;
+        collect = new Object[61];
         collect[0] = this.url;
         collect[1] = this.timeDelta;
         collect[2] = this.n_tokens_title;
