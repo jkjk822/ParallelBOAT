@@ -12,13 +12,13 @@ public class CompareByAttribute implements Comparator<Article>{
 
     public int compare(Article a, Article b) {
         if(a.getData()[index] instanceof Integer) {
-            Integer aData = (Integer) a.getData()[index];
-            Integer bData = (Integer) b.getData()[index];
-            return aData.compareTo(bData);
+            int x = (int) a.getData()[index];
+            int y = (int) b.getData()[index];
+            return Integer.compare(x,y);
         } else if (a.getData()[index] instanceof Double) {
-            Double aData = (Double) a.getData()[index];
-            Double bData = (Double) b.getData()[index];
-            return aData.compareTo(bData);
+            double x = (double) a.getData()[index];
+            double y = (double) b.getData()[index];
+            return Double.compare(x,y);
         }
         return 0;
     }

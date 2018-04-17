@@ -15,6 +15,16 @@ public class LeafNode extends Node {
     }
 
     @Override
+    public Node getLeftChild() {
+        return null;
+    }
+
+    @Override
+    public Node getRightChild() {
+        return null;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

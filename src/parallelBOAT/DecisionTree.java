@@ -12,9 +12,9 @@ public class DecisionTree {
 
     public static Node generateDecisionTree(Article[] data) {
         ArrayList<Attribute> attributes = new ArrayList<>(Arrays.asList(Attribute.values()));
-        attributes.remove(0);
-        attributes.remove(1);
         attributes.remove(attributes.size()-1);
+        attributes.remove(1);
+        attributes.remove(0);
         return generateDecisionTree(data, new ArrayList<>(attributes),0);
     }
 
@@ -126,7 +126,7 @@ public class DecisionTree {
         return new Pair<>(Driver.imp.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0])), 0.0);
     }
 
-    public static Pair<Double, Double> bestGiniSplitDouble(Article[] data, Attribute attribute){
+    static Pair<Double, Double> bestGiniSplitDouble(Article[] data, Attribute attribute){
         // Sort data by attribute value
         Arrays.sort(data, new CompareByAttribute(attribute));
         double bestSplit = Double.NaN;
@@ -148,7 +148,7 @@ public class DecisionTree {
         return new Pair<>(bestGini, bestSplit);
     }
 
-    private static double getDouble(Object n){
+    static double getDouble(Object n){
         return ((Number) n).doubleValue();
     }
 
