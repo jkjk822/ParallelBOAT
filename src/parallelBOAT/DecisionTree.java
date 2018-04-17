@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 public class DecisionTree {
 
     public static Node generateDecisionTree(Article[] data) {
-        List<Attribute> attributes = Arrays.asList(Attribute.values());
+        ArrayList<Attribute> attributes = new ArrayList<>(Arrays.asList(Attribute.values()));
         attributes.remove(0);
         attributes.remove(1);
         attributes.remove(attributes.size()-1);
