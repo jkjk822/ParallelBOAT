@@ -35,7 +35,7 @@ public class DecisionTree {
 
         ArrayList<Article> left = new ArrayList<>();
         ArrayList<Article> right = new ArrayList<>();
-        splitData(left, right, data, bestSplit.getKey(), bestSplit.getValue());
+        splitData(data, left, right, bestSplit.getKey(), bestSplit.getValue());
         attributes.remove(bestSplit.getKey());
         ArrayList<Attribute> leftAttributes = new ArrayList<>(attributes);
         ArrayList<Attribute> rightAttributes = new ArrayList<>(attributes);
@@ -65,7 +65,7 @@ public class DecisionTree {
     }
 
     private static Popularity getMajorityClass(Article [] data) {
-
+        //TODO: implement same way as gini?
         HashMap<Popularity, Integer> count = new HashMap<>();
 
         for (Article a : data) {
@@ -77,75 +77,115 @@ public class DecisionTree {
 
     }
 
-    private static void splitData(ArrayList<Article> left, ArrayList<Article> right, Article[] data, Attribute attribute, Double splitPoint) {
-        Boolean isBool = data[0].getData()[attribute.getIndex()] instanceof Boolean;
+    static void splitData(Article[] data, ArrayList<Article> left, ArrayList<Article> right, ArrayList<Article> middle, Attribute attribute, double splitPoint, double conf) {
+        if(Double.isNaN(splitPoint)) throw new RuntimeException("No confidence interval for booleans");
         for(Article a : data) {
-            if(isBool) {
-                if((boolean)a.getData()[attribute.getIndex()])
-                    right.add(a);
-                else
-                    left.add(a);
-            } else {
-                if(getDouble(a.getData()[attribute.getIndex()]) > splitPoint)
-                    right.add(a);
-                else
-                    left.add(a);
-            }
+            double val = getDouble(a.getData()[attribute.getIndex()]);
+            if(val < splitPoint-conf)
+                left.add(a);
+            else if(val > splitPoint+conf)
+                right.add(a);
+            else
+                middle.add(a);
+        }
+    }
+
+    static void splitData(Article[] data, ArrayList<Article> left, ArrayList<Article> right, Attribute attribute, double splitPoint) {
+        if(Double.isNaN(splitPoint)){
+            splitData(data, left, right, attribute);
+            return;
+        }
+        for (Article a : data) {
+            if (getDouble(a.getData()[attribute.getIndex()]) > splitPoint)
+                right.add(a);
+            else
+                left.add(a);
+        }
+    }
+
+    static void splitData(Article[] data, ArrayList<Article> left, ArrayList<Article> right, Attribute attribute) {
+        for(Article a : data) {
+            if((boolean)a.getData()[attribute.getIndex()])
+                right.add(a);
+            else
+                left.add(a);
         }
     }
 
     private static Pair<Attribute, Double> chooseBestAttribute(Article[] data, ArrayList<Attribute> attributes) {
         Attribute bestAttribute = attributes.get(0);
         double bestSplit = Double.NaN;
-        double bestGini = Double.POSITIVE_INFINITY;
+        double bestImp = Double.POSITIVE_INFINITY;
 
         for(Attribute a : attributes) {
-            Pair<Double, Double> result = bestGiniSplit(data, a);
-            if(result.getKey() > bestGini) {
+            double[] result = bestSplit(data, a);
+            if(result[0] > bestImp) {
                 bestAttribute = a;
-                bestSplit = result.getValue();
-                bestGini = result.getKey();
+                bestImp = result[0];
+                bestSplit = result[1];
             }
         }
 
         return new Pair<>(bestAttribute, bestSplit);
     }
-
-    private static Pair<Double, Double> bestGiniSplit(Article [] data, Attribute attribute) {
+    //TODO: use arraylists instead of arrays
+    private static double[] bestSplit(Article [] data, Attribute attribute) {
         // If boolean we already know best split point
         if(data[0].getData()[attribute.getIndex()] instanceof Boolean) {
-            return bestGiniSplitBool(data, attribute);
+            return bestSplitBool(data, attribute);
         }
-        return bestGiniSplitDouble(data, attribute);
+        return bestSplitDouble(data, attribute);
     }
 
-    private static Pair<Double, Double> bestGiniSplitBool(Article[] data, Attribute attribute){
+    private static double[] bestSplitBool(Article[] data, Attribute attribute){
         ArrayList<Article> left = new ArrayList<>();
         ArrayList<Article> right = new ArrayList<>();
-        splitData(left, right, data, attribute, 0.0);
-        return new Pair<>(Driver.imp.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0])), 0.0);
+        splitData(data, left, right, attribute);
+        return new double[]{Driver.imp.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0])), Double.NaN};
     }
 
-    static Pair<Double, Double> bestGiniSplitDouble(Article[] data, Attribute attribute){
+    static double[] bestSplitDouble(Article[] data, Attribute attribute){
         // Sort data by attribute value
         Arrays.sort(data, new CompareByAttribute(attribute));
         double bestSplit = Double.NaN;
-        double bestGini = Double.POSITIVE_INFINITY;
+        double bestImp = Double.POSITIVE_INFINITY;
 
         // Check each split point for best
         for(int i = 1; i < data.length; i++) {
             Article[] left = Arrays.copyOfRange(data, 0, i);
             Article[] right = Arrays.copyOfRange(data, i, data.length);
-            double currentGini = Driver.imp.computeImpurity(left, right);
-            if(currentGini < bestGini) {
-                bestGini = currentGini;
+            double currentImp = Driver.imp.computeImpurity(left, right);
+            if(currentImp < bestImp) {
+                bestImp = currentImp;
                 bestSplit = (getDouble(data[i-1].getData()[attribute.getIndex()])
                         + getDouble(data[i-1].getData()[attribute.getIndex()])) / 2;
             }
         }
 
         // Return best split point
-        return new Pair<>(bestGini, bestSplit);
+        return new double[]{bestImp, bestSplit};
+    }
+
+    static double[] bestSplitBootStrap(Article[] data, Attribute attribute, double[] range){
+        // Sort data by attribute value
+        Arrays.sort(range);
+        double bestSplit = Double.NaN;
+        double bestImp = Double.POSITIVE_INFINITY;
+
+        // Check each split point for best
+        for(double split : range) {
+            ArrayList<Article> left = new ArrayList<>();
+            ArrayList<Article> right = new ArrayList<>();
+            splitData(data, left, right, attribute, split);
+            double currentImp = Driver.imp.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0]));
+            if(currentImp < bestImp) {
+                bestImp = currentImp;
+                bestSplit = split;
+            }
+        }
+
+        // Return best split point
+        return new double[]{bestImp, bestSplit};
     }
 
     static double getDouble(Object n){
