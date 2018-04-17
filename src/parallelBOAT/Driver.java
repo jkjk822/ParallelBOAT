@@ -1,9 +1,12 @@
 package parallelBOAT;
 
+import parallelBOAT.tree.Node;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Driver {
@@ -50,7 +53,10 @@ public class Driver {
 
 
         DecisionTree dt = new DecisionTree();
-        Article[] newdata = Arrays.copyOfRange(rawData, 0, 3);
+        Article[] newdata = Arrays.copyOfRange(rawData, 0, 100);
+        ArrayList<Attribute> attributes = new ArrayList<>();
+        attributes.add(Attribute.abs_title_sentiment_polarity);
+        Node tree = dt.generateDecisionTree(newdata, attributes, 0);
 //        System.out.println(dt.getMajorityClass(newdata));
 
     }
