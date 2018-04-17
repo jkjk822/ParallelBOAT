@@ -46,7 +46,7 @@ public class Driver {
             }
         }
 
-        BootStrap.buildBootStrapTree(rawData, 10, 1000);
+        BootStrap.generateBOATTree(rawData, 10, 1000);
 
 
 

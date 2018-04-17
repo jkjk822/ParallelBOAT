@@ -24,7 +24,7 @@ public class BootStrap {
         return sample;
     }
 
-    public static Node buildBootStrapTree(Article[] data, int width, int depth){
+    public static Node generateBOATTree(Article[] data, int width, int depth){
         Node[] trees = new Node[width];
         for(int i = 0; i < width; i++)
             trees[i] = DecisionTree.generateDecisionTree(sample(data, depth));
