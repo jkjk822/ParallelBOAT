@@ -2,8 +2,6 @@ package parallelBOAT.tree;
 
 import parallelBOAT.Popularity;
 
-import java.util.Objects;
-
 public class LeafNode extends Node {
 
     private Popularity classLabel;

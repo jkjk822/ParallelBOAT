@@ -54,11 +54,10 @@ public class Driver {
         System.out.println(rawData[0].getShares());
 
 
-        DecisionTree dt = new DecisionTree();
         Article[] newdata = Arrays.copyOfRange(rawData, 0, 100);
         ArrayList<Attribute> attributes = new ArrayList<>();
         attributes.add(Attribute.abs_title_sentiment_polarity);
-        Node tree = dt.generateDecisionTree(newdata, attributes, 0);
+        Node tree = DecisionTree.generateDecisionTree(newdata, attributes, 0);
 //        System.out.println(dt.getMajorityClass(newdata));
 
     }

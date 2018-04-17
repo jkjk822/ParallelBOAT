@@ -24,9 +24,4 @@ public abstract class Node {
         this.leftChild = null;
         this.rightChild = null;
     }
-
-    public Node(Node leftChild, Node rightChild) {
-        this.leftChild = leftChild;
-        this.rightChild = rightChild;
-    }
 }

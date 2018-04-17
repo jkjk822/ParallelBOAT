@@ -8,4 +8,12 @@ public class ConfidenceNode extends InternalNode {
         super(n);
         this.splitConfidence = splitConfidence;
     }
+
+    public double getSplitConfidence() {
+        return splitConfidence;
+    }
+
+    public void setSplitConfidence(double splitConfidence) {
+        this.splitConfidence = splitConfidence;
+    }
 }
