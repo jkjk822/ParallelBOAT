@@ -1,11 +1,14 @@
 package parallelBOAT;
 
+import javafx.util.Pair;
 import parallelBOAT.tree.ConfidenceNode;
 import parallelBOAT.tree.InternalNode;
 import parallelBOAT.tree.LeafNode;
 import parallelBOAT.tree.Node;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
@@ -13,33 +16,43 @@ public class BootStrap {
 
     private static ImpurityFunction imp;
 
-    public static Article[] sample(Article[] dataset, int size){
+    public static Article[] sample(Article[] data, int size){
         Article[] sample = new Article[size];
         for(int i = 0; i < size; i++){
-            sample[i] = dataset[ThreadLocalRandom.current().nextInt(0, dataset.length)];
+            sample[i] = data[ThreadLocalRandom.current().nextInt(0, data.length)];
         }
         return sample;
     }
 
-    public static Node buildBootStrapTree(Article[] dataset, int width, int depth){
+    public static Node buildBootStrapTree(Article[] data, int width, int depth){
         Node[] trees = new Node[width];
         for(int i = 0; i < width; i++)
-            trees[i] = generateDecisionTree(sample(dataset, depth));
-        return refine(combineOrPrune(trees));
+            trees[i] = DecisionTree.generateDecisionTree(sample(data, depth));
+        return refine(data, combineOrPrune(trees));
     }
 
-    private static Node refine(Node root){
+    private static Node refine(Article[] data, Node root){
+        if(root==null)
+            return null;
         if(root instanceof ConfidenceNode)
-            root = getExactSplit((ConfidenceNode) root);
-        root.setLeftChild(refine(root.getLeftChild()));
-        root.setRightChild(refine(root.getRightChild()));
+            root = getExactSplit(data, (ConfidenceNode) root);
+        root.setLeftChild(refine(data, root.getLeftChild()));
+        root.setRightChild(refine(data, root.getRightChild()));
         return root;
     }
 
-    private static InternalNode getExactSplit(ConfidenceNode n){
-//        InternalNode
-//
-//        return
+    private static InternalNode getExactSplit(Article[] data, ConfidenceNode n){
+        double low = n.getSplitPoint()-n.getSplitConfidence();
+        double high = n.getSplitPoint()+n.getSplitConfidence();
+        List<Article> articles = new ArrayList<>();
+        for(Article a : data) {
+            double val = (double) a.getData()[n.getSplitAttribute().getIndex()];
+            if (low <= val && val <= high) {
+                articles.add(a);
+            }
+        }
+        Pair<Double, Double> p = DecisionTree.bestGiniSplitDouble(articles.toArray(new Article[0]), n.getSplitAttribute());
+        return new InternalNode(n.getSplitAttribute(), p.getValue());
     }
 
     private static Node combineOrPrune(Node[] trees){
@@ -64,9 +77,9 @@ public class BootStrap {
         return new ConfidenceNode(trees[0], computeConfidence(splitPoints, confLevel));
     }
 
-    private static double computeConfidence(double[] data, double conf){
-        double mean = Arrays.stream(data).sum()/data.length;
-        double std = Math.sqrt(Arrays.stream(data).map(x->(x-mean)*(x-mean)).sum()/data.length);
-        return conf*std/Math.sqrt(data.length);
+    private static double computeConfidence(double[] values, double conf){
+        double mean = Arrays.stream(values).sum()/values.length;
+        double std = Math.sqrt(Arrays.stream(values).map(x->(x-mean)*(x-mean)).sum()/values.length);
+        return conf*std/Math.sqrt(values.length);
     }
 }
