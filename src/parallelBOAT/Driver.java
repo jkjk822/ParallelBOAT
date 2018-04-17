@@ -84,8 +84,7 @@ public class Driver {
 
                 // Count up occurances of each class
                 for (Article a : data) {
-                    count.putIfAbsent(a.getPopularity(), 0);
-                    count.put(a.getPopularity(), count.get(a.getPopularity()) + 1);
+                    count.put(a.getPopularity(), count.getOrDefault(a.getPopularity(),0) + 1);
                 }
 
                 // Get each p^2
