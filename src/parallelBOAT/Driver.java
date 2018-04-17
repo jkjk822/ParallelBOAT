@@ -6,10 +6,12 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 public class Driver {
+
+
+    public static ImpurityFunction imp;
 
     public static void main(String [] args) {
 
@@ -17,6 +19,8 @@ public class Driver {
         BufferedReader br = null;
         String file = "./resources/OnlineNewsPopularity.csv";
         String line = "";
+
+        imp = chooseImpurityFunction();
 
         try {
             br = new BufferedReader(new FileReader(file));
@@ -29,8 +33,6 @@ public class Driver {
                 rawData[i] = new Article(line.split(", "));
                 i++;
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -60,4 +62,41 @@ public class Driver {
 //        System.out.println(dt.getMajorityClass(newdata));
 
     }
+
+
+    private static ImpurityFunction chooseImpurityFunction(){
+        //if input = gini index
+        return new ImpurityFunction() {
+            @Override
+            public double computeImpurity(Article[]... partitions) {
+                return Arrays.stream(partitions).mapToDouble(this::giniIndex).sum()
+                        /Arrays.stream(partitions).mapToInt(a -> a.length).sum();
+            }
+
+            private double giniIndex(Article[] data) {
+                HashMap<Popularity, Integer> count = new HashMap<>();
+
+                // Count up occurances of each class
+                for (Article a : data) {
+                    count.putIfAbsent(a.getPopularity(), 0);
+                    count.put(a.getPopularity(), count.get(a.getPopularity()) + 1);
+                }
+
+                // Get each p^2
+                double sum = 0.0;
+                for(Map.Entry<Popularity, Integer> pair : count.entrySet()){
+                    sum += Math.pow(pair.getValue() / (double)data.length, 2);
+                }
+
+                // Return 1 - sum of p^2
+                return (1 - sum)*data.length;
+
+            }
+        };
+        
+        //if input = entropy
+    }
+
+
+
 }

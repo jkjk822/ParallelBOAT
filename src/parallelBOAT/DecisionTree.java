@@ -31,8 +31,8 @@ public class DecisionTree {
         ArrayList<Article> right = new ArrayList<>();
         splitData(left, right, data, bestSplit.getKey(), bestSplit.getValue());
         attributes.remove(bestSplit.getKey());
-        ArrayList<Attribute> leftAttributes = new ArrayList<Attribute>(attributes);
-        ArrayList<Attribute> rightAttributes = new ArrayList<Attribute>(attributes);
+        ArrayList<Attribute> leftAttributes = new ArrayList<>(attributes);
+        ArrayList<Attribute> rightAttributes = new ArrayList<>(attributes);
 
         // Build internal Node
         InternalNode node = new InternalNode(bestSplit.getKey(), bestSplit.getValue());
@@ -40,12 +40,12 @@ public class DecisionTree {
         if(left.isEmpty())
             node.setLeftChild(new LeafNode(getMajorityClass(data)));
         else
-            node.setLeftChild(generateDecisionTree(left.toArray(new Article[left.size()]), leftAttributes, level + 1));
+            node.setLeftChild(generateDecisionTree(left.toArray(new Article[0]), leftAttributes, level + 1));
 
         if(right.isEmpty())
             node.setLeftChild(new LeafNode(getMajorityClass(data)));
         else
-            node.setLeftChild(generateDecisionTree(right.toArray(new Article[right.size()]), rightAttributes, level + 1));
+            node.setLeftChild(generateDecisionTree(right.toArray(new Article[0]), rightAttributes, level + 1));
 
         return node;
     }
@@ -60,7 +60,7 @@ public class DecisionTree {
 
     private Popularity getMajorityClass(Article [] data) {
 
-        HashMap<Popularity, Integer> count = new HashMap<Popularity, Integer>();
+        HashMap<Popularity, Integer> count = new HashMap<>();
 
         for (Article a : data) {
             count.putIfAbsent(a.getPopularity(), 0);
@@ -111,19 +111,19 @@ public class DecisionTree {
             ArrayList<Article> left = new ArrayList<>();
             ArrayList<Article> right = new ArrayList<>();
             splitData(left, right, data, attribute, 0.0);
-            return new Pair<>(giniIndex(left.toArray(new Article[left.size()]), right.toArray(new Article[left.size()])), 0.0);
+            return new Pair<>(Driver.imp.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0])), 0.0);
         }
 
         // Sort data by attribute value
         Arrays.sort(data, new CompareByAttribute(attribute));
-        Double bestSplit = 0.0;
-        Double bestGini = 0.0;
+        double bestSplit = 0.0;
+        double bestGini = 0.0;
 
         // Check each split point for best
         for(int i = 0; i < data.length; i++) {
             Article[] left = Arrays.copyOfRange(data, 0, i + 1);
             Article[] right = Arrays.copyOfRange(data, i, data.length);
-            Double currentGini = giniIndex(left, right);
+            double currentGini = Driver.imp.computeImpurity(left, right);
             if(currentGini > bestGini) {
                 bestGini = currentGini;
                 bestSplit = ((Double)data[i].getData()[attribute.getIndex()] + (Double)data[i + 1].getData()[attribute.getIndex()]) / 2;
@@ -134,31 +134,4 @@ public class DecisionTree {
         return new Pair<>(bestGini, bestSplit);
     }
 
-    private Double giniIndex(Article[] left, Article[] right) {
-        Double giniLeft = giniIndex(left) * left.length / (left.length + right.length);
-        Double giniRight = giniIndex(right) * right.length / (left.length + right.length);
-        return giniLeft + giniRight;
-    }
-
-    private Double giniIndex(Article[] data) {
-        HashMap<Popularity, Integer> count = new HashMap<Popularity, Integer>();
-
-        // Count up occurances of each class
-        for (Article a : data) {
-            count.putIfAbsent(a.getPopularity(), 0);
-            count.put(a.getPopularity(), count.get(a.getPopularity()) + 1);
-        }
-
-        // Get each p^2
-        Double sum = 0.0;
-        Iterator it = count.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            sum += Math.pow((Integer)pair.getValue() / (double)data.length, 2);
-        }
-
-        // Return 1 - sum of p^2
-        return 1 - sum;
-
-    }
 }

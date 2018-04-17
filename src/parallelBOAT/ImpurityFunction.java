@@ -2,5 +2,5 @@ package parallelBOAT;
 
 @FunctionalInterface
 public interface ImpurityFunction {
-    double computeImpurity(Article[] dataset, Attribute attribute);
+    double computeImpurity(Article[]... partitions);
 }
