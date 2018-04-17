@@ -46,6 +46,13 @@ public class Driver {
             }
         }
 
+        BootStrap.buildBootStrapTree(rawData, 10, 1000);
+
+
+
+
+        /*Willie's testing
+
 //        System.out.println(rawData[0].getData()[Attribute.weekday_is_friday.getIndex()].toString());
 //        System.out.println(rawData[0].isWeekday_is_monday());
 
@@ -59,7 +66,7 @@ public class Driver {
         attributes.add(Attribute.abs_title_sentiment_polarity);
         Node tree = DecisionTree.generateDecisionTree(newdata, attributes, 0);
 //        System.out.println(dt.getMajorityClass(newdata));
-
+*/
     }
 
 
@@ -69,7 +76,7 @@ public class Driver {
             @Override
             public double computeImpurity(Article[]... partitions) {
                 return Arrays.stream(partitions).mapToDouble(this::giniIndex).sum()
-                        /Arrays.stream(partitions).mapToInt(a -> a.length).sum();
+                        /Arrays.stream(partitions).mapToInt(partition -> partition.length).sum();
             }
 
             private double giniIndex(Article[] data) {

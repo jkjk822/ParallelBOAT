@@ -86,7 +86,7 @@ public class DecisionTree {
                 else
                     left.add(a);
             } else {
-                if((double) a.getData()[attribute.getIndex()] > splitPoint)
+                if(getDouble(a.getData()[attribute.getIndex()]) > splitPoint)
                     right.add(a);
                 else
                     left.add(a);
@@ -111,7 +111,6 @@ public class DecisionTree {
         return new Pair<>(bestAttribute, bestSplit);
     }
 
-    //TODO: rewrite to pass boolean[] and double[]
     private static Pair<Double, Double> bestGiniSplit(Article [] data, Attribute attribute) {
         // If boolean we already know best split point
         if(data[0].getData()[attribute.getIndex()] instanceof Boolean) {
@@ -140,12 +139,17 @@ public class DecisionTree {
             double currentGini = Driver.imp.computeImpurity(left, right);
             if(currentGini < bestGini) {
                 bestGini = currentGini;
-                bestSplit = ((double)data[i-1].getData()[attribute.getIndex()] + (double)data[i].getData()[attribute.getIndex()]) / 2;
+                bestSplit = (getDouble(data[i-1].getData()[attribute.getIndex()])
+                        + getDouble(data[i-1].getData()[attribute.getIndex()])) / 2;
             }
         }
 
         // Return best split point
         return new Pair<>(bestGini, bestSplit);
+    }
+
+    private static double getDouble(Object n){
+        return ((Number) n).doubleValue();
     }
 
 }

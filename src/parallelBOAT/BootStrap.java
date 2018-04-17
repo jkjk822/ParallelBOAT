@@ -79,7 +79,7 @@ public class BootStrap {
 
     private static double computeConfidence(double[] values, double conf){
         double mean = Arrays.stream(values).sum()/values.length;
-        double std = Math.sqrt(Arrays.stream(values).map(x->(x-mean)*(x-mean)).sum()/values.length);
+        double std = Math.sqrt(Arrays.stream(values).map(x -> (x-mean)*(x-mean)).sum()/values.length);
         return conf*std/Math.sqrt(values.length);
     }
 }
