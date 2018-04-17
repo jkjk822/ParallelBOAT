@@ -2,24 +2,22 @@ package parallelBOAT.tree;
 
 import parallelBOAT.Attribute;
 
-import java.util.Objects;
-
-public class InternalNode<T> extends Node{
+public class InternalNode extends Node{
 
     protected Attribute splitAttribute;
-    protected T splitPoint;
+    protected double splitPoint = Double.NaN; //NaN means we're doing a boolean split
 
-    public InternalNode(Attribute splitAttribute, T splitPoint) {
+    public InternalNode(Attribute splitAttribute, double splitPoint) {
         this.splitAttribute = splitAttribute;
         this.splitPoint = splitPoint;
     }
 
-    public InternalNode(InternalNode<T> n){
+    public InternalNode(InternalNode n){
         splitAttribute = n.splitAttribute;
         splitPoint = n.splitPoint;
     }
 
-    public InternalNode(InternalNode<T> n, boolean keepChildren){
+    public InternalNode(InternalNode n, boolean keepChildren){
         this(n);
         if(keepChildren) {
             leftChild = n.leftChild;
@@ -35,11 +33,11 @@ public class InternalNode<T> extends Node{
         this.splitAttribute = splitAttribute;
     }
 
-    public T getSplitPoint() {
+    public double getSplitPoint() {
         return splitPoint;
     }
 
-    public void setSplitPoint(T splitPoint) {
+    public void setSplitPoint(double splitPoint) {
         this.splitPoint = splitPoint;
     }
 
@@ -47,10 +45,7 @@ public class InternalNode<T> extends Node{
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        InternalNode<?> that = (InternalNode<?>) o;
-        if (splitAttribute != that.splitAttribute) return false;
-        if (this.splitPoint instanceof Boolean)
-            return Objects.equals(splitPoint, that.splitPoint);
-        return true;
+        InternalNode that = (InternalNode) o;
+        return splitAttribute == that.splitAttribute;
     }
 }
