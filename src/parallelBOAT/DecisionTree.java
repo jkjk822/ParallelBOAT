@@ -84,10 +84,21 @@ public class DecisionTree {
     }
 
     private Pair<Attribute, Double> chooseBestAttribute(Article[] data, ArrayList<Attribute> attributes) {
+        Attribute bestAttribute = attributes.get(0);
+        Double bestSplit = 0.0;
+        Double bestGini = -1.0;
+
+        for(Attribute a : attributes) {
+            Pair<Double, Double> result = bestGiniSplit(data, a);
+            if(result.getKey() > bestGini) {
+                
+            }
+        }
+
         return new Pair<>(attributes.get(0), 0.0);
     }
 
-    private Pair<Double, Double> computeGini(Article [] data, Attribute attribute) {
+    private Pair<Double, Double> bestGiniSplit(Article [] data, Attribute attribute) {
         //sort data by attribute
         //for each splitting point
         //  giniSum
