@@ -19,7 +19,7 @@ public class DecisionTree {
     }
 
     public static Node generateDecisionTree(Article[] data, ArrayList<Attribute> attributes, int level) {
-//        System.out.println("LEVEL : " + level);
+
         // If all articles are same class -> return leaf node
         if(getClass(data) != Popularity.MULTI) {
             return new LeafNode(getClass(data));
@@ -35,6 +35,7 @@ public class DecisionTree {
 
         ArrayList<Article> left = new ArrayList<>();
         ArrayList<Article> right = new ArrayList<>();
+
         splitData(data, left, right, bestSplit.getKey(), bestSplit.getValue());
         attributes.remove(bestSplit.getKey());
         ArrayList<Attribute> leftAttributes = new ArrayList<>(attributes);
@@ -42,16 +43,15 @@ public class DecisionTree {
 
         // Build internal Node
         InternalNode node = new InternalNode(bestSplit.getKey(), bestSplit.getValue());
-
         if(left.isEmpty())
             node.setLeftChild(new LeafNode(getMajorityClass(data)));
         else
             node.setLeftChild(generateDecisionTree(left.toArray(new Article[0]), leftAttributes, level + 1));
 
         if(right.isEmpty())
-            node.setLeftChild(new LeafNode(getMajorityClass(data)));
+            node.setRightChild(new LeafNode(getMajorityClass(data)));
         else
-            node.setLeftChild(generateDecisionTree(right.toArray(new Article[0]), rightAttributes, level + 1));
+            node.setRightChild(generateDecisionTree(right.toArray(new Article[0]), rightAttributes, level + 1));
 
         return node;
     }
@@ -119,7 +119,7 @@ public class DecisionTree {
 
         for(Attribute a : attributes) {
             double[] result = bestSplit(data, a);
-            if(result[0] > bestImp) {
+            if(result[0] < bestImp) {
                 bestAttribute = a;
                 bestImp = result[0];
                 bestSplit = result[1];

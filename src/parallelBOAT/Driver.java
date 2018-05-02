@@ -1,5 +1,7 @@
 package parallelBOAT;
 
+import parallelBOAT.tree.Node;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -46,28 +48,26 @@ public class Driver {
         }
 
 //        DecisionTree.generateDecisionTree(rawData);
-        BootStrap.generateBOATTree(rawData, 10, 1000);
+//        BootStrap.generateBOATTree(rawData, 10, 1000);
 
 
 
 
 
-        /*Willie's testing
+        //Willie's testing
 
 //        System.out.println(rawData[0].getData()[Attribute.weekday_is_friday.getIndex()].toString());
 //        System.out.println(rawData[0].isWeekday_is_monday());
 
-        System.out.println(rawData[0].getShares());
-//        Arrays.sort(rawData, new CompareByAttribute(Attribute.shares));
-        System.out.println(rawData[0].getShares());
+//        System.out.println(rawData[0].getShares());
+////        Arrays.sort(rawData, new CompareByAttribute(Attribute.shares));
+//        System.out.println(rawData[0].getShares());
 
 
         Article[] newdata = Arrays.copyOfRange(rawData, 0, 100);
-        ArrayList<Attribute> attributes = new ArrayList<>();
-        attributes.add(Attribute.abs_title_sentiment_polarity);
-        Node tree = DecisionTree.generateDecisionTree(newdata, attributes, 0);
-//        System.out.println(dt.getMajorityClass(newdata));
-*/
+        Node tree = DecisionTree.generateDecisionTree(newdata);
+        System.out.println("DONE");
+
     }
 
 
