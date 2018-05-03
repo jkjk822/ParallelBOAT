@@ -64,9 +64,20 @@ public class Driver {
 //        System.out.println(rawData[0].getShares());
 
 
-        Article[] newdata = Arrays.copyOfRange(rawData, 0, 100);
+        Article[] newdata = Arrays.copyOfRange(rawData, 0, 5000);
         Node tree = DecisionTree.generateDecisionTree(newdata);
         System.out.println("DONE");
+
+        int correct = 0;
+        for(int i = 0; i < 100; i++) {
+            Popularity test = DecisionTree.classify(tree, rawData[20000 + i]);
+            if(test == rawData[20000 + i].getPopularity())
+                correct++;
+            System.out.print("ACTUAL: " + rawData[20000 + i].getPopularity());
+            System.out.println(", CLASSIFIED: " + test);
+        }
+
+        System.out.println(correct);
 
     }
 

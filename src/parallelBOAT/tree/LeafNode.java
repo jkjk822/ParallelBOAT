@@ -31,4 +31,8 @@ public class LeafNode extends Node {
         LeafNode leafNode = (LeafNode) o;
         return classLabel == leafNode.classLabel;
     }
+
+    public Popularity getClassLabel() {
+        return this.classLabel;
+    }
 }

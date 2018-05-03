@@ -18,8 +18,27 @@ public class DecisionTree {
         return generateDecisionTree(data, new ArrayList<>(attributes),0);
     }
 
-    public static Node generateDecisionTree(Article[] data, ArrayList<Attribute> attributes, int level) {
+    public static Popularity classify(Node tree, Article article) {
+        if(tree instanceof LeafNode) {
+            return ((LeafNode) tree).getClassLabel();
+        }
+        double splitPoint = ((InternalNode) tree).getSplitPoint();
+        if(Double.isNaN(splitPoint)) {
+            if((boolean)article.getData()[((InternalNode) tree).getSplitAttribute().getIndex()])
+                return classify(tree.getRightChild(), article);
+            else
+                return classify(tree.getLeftChild(), article);
+        } else {
+            if (getDouble(article.getData()[((InternalNode) tree).getSplitAttribute().getIndex()]) > splitPoint) {
+                return classify(tree.getRightChild(), article);
+            } else {
+                return classify(tree.getLeftChild(), article);
+            }
+        }
+    }
 
+    public static Node generateDecisionTree(Article[] data, ArrayList<Attribute> attributes, int level) {
+        System.out.println(level);
         // If all articles are same class -> return leaf node
         if(getClass(data) != Popularity.MULTI) {
             return new LeafNode(getClass(data));
