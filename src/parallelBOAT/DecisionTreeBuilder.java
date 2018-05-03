@@ -9,8 +9,8 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class DecisionTreeBuilder {
-    private static final int LEFT = -1;
-    private static final int RIGHT = 1;
+    protected static final int LEFT = -1;
+    protected static final int RIGHT = 1;
 
     protected Article[] data;
     protected Node tree;

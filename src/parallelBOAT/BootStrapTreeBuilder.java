@@ -72,11 +72,9 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
     protected void splitData(Article[] data, ArrayList<Article> left, ArrayList<Article> right, ArrayList<Article> middle, Attribute attribute, double splitPoint, double conf) {
         if (Double.isNaN(splitPoint)) throw new RuntimeException("No confidence interval for booleans");
         for (Article a : data) {
-            // TODO: You can use the direction() method here too, just feed in (splitPoint - conf) as splitpoint
-            double val = getDouble(a.getData()[attribute.getIndex()]);
-            if (val < splitPoint - conf)
+            if (direction(a, attribute,  splitPoint - conf) == LEFT)
                 left.add(a);
-            else if (val > splitPoint + conf)
+            else if (direction(a, attribute,  splitPoint + conf) == RIGHT)
                 right.add(a);
             else
                 middle.add(a);
