@@ -9,6 +9,8 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class DecisionTree {
+    private static int LEFT = -1;
+    private static int RIGHT = 1;
 
     public static Node generateDecisionTree(Article[] data) {
         ArrayList<Attribute> attributes = new ArrayList<>(Arrays.asList(Attribute.values()));
@@ -23,17 +25,10 @@ public class DecisionTree {
             return ((LeafNode) tree).getClassLabel();
         }
         double splitPoint = ((InternalNode) tree).getSplitPoint();
-        if(Double.isNaN(splitPoint)) {
-            if((boolean)article.getData()[((InternalNode) tree).getSplitAttribute().getIndex()])
-                return classify(tree.getRightChild(), article);
-            else
-                return classify(tree.getLeftChild(), article);
+        if(direction(article, ((InternalNode) tree).getSplitAttribute(), splitPoint) == 1) {
+            return classify(tree.getRightChild(), article);
         } else {
-            if (getDouble(article.getData()[((InternalNode) tree).getSplitAttribute().getIndex()]) > splitPoint) {
-                return classify(tree.getRightChild(), article);
-            } else {
-                return classify(tree.getLeftChild(), article);
-            }
+            return classify(tree.getLeftChild(), article);
         }
     }
 
@@ -110,21 +105,8 @@ public class DecisionTree {
     }
 
     static void splitData(Article[] data, ArrayList<Article> left, ArrayList<Article> right, Attribute attribute, double splitPoint) {
-        if(Double.isNaN(splitPoint)){
-            splitData(data, left, right, attribute);
-            return;
-        }
         for (Article a : data) {
-            if (getDouble(a.getData()[attribute.getIndex()]) > splitPoint)
-                right.add(a);
-            else
-                left.add(a);
-        }
-    }
-
-    static void splitData(Article[] data, ArrayList<Article> left, ArrayList<Article> right, Attribute attribute) {
-        for(Article a : data) {
-            if((boolean)a.getData()[attribute.getIndex()])
+            if(direction(a, attribute, splitPoint) == RIGHT)
                 right.add(a);
             else
                 left.add(a);
@@ -205,6 +187,22 @@ public class DecisionTree {
 
         // Return best split point
         return new double[]{bestImp, bestSplit};
+    }
+
+    // Classify as left or right for a split point and attribute
+    private static int direction(Article article, Attribute attribute, double splitPoint) {
+        if(Double.isNaN(splitPoint)) {
+            if((boolean)article.getData()[attribute.getIndex()])
+                return RIGHT;
+            else
+                return LEFT;
+        } else {
+            if (getDouble(article.getData()[attribute.getIndex()]) > splitPoint) {
+                return RIGHT;
+            } else {
+                return LEFT;
+            }
+        }
     }
 
     static double getDouble(Object n){
