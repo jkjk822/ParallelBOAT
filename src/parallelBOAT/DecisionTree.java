@@ -141,7 +141,7 @@ public class DecisionTree {
     private static double[] bestSplitBool(Article[] data, Attribute attribute){
         ArrayList<Article> left = new ArrayList<>();
         ArrayList<Article> right = new ArrayList<>();
-        splitData(data, left, right, attribute);
+        splitData(data, left, right, attribute, Double.NaN);
         return new double[]{Driver.imp.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0])), Double.NaN};
     }
 
