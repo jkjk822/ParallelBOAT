@@ -94,6 +94,7 @@ public class DecisionTree {
     static void splitData(Article[] data, ArrayList<Article> left, ArrayList<Article> right, ArrayList<Article> middle, Attribute attribute, double splitPoint, double conf) {
         if(Double.isNaN(splitPoint)) throw new RuntimeException("No confidence interval for booleans");
         for(Article a : data) {
+            // TODO: You can use the direction() method here too, just feed in (splitPoint - conf) as splitpoint
             double val = getDouble(a.getData()[attribute.getIndex()]);
             if(val < splitPoint-conf)
                 left.add(a);
