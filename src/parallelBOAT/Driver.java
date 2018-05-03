@@ -47,7 +47,7 @@ public class Driver {
             }
         }
 
-//        DecisionTree.generateDecisionTree(rawData);
+//        DecisionTreeBuilder.generateDecisionTree(rawData);
 //        BootStrap.generateBOATTree(rawData, 10, 1000);
 
 
@@ -65,12 +65,12 @@ public class Driver {
 
 
         Article[] newdata = Arrays.copyOfRange(rawData, 0, 5000);
-        Node tree = DecisionTree.generateDecisionTree(newdata);
+        Node tree = DecisionTreeBuilder.generateDecisionTree(newdata);
         System.out.println("DONE");
 
         int correct = 0;
         for(int i = 0; i < 100; i++) {
-            Popularity test = DecisionTree.classify(tree, rawData[20000 + i]);
+            Popularity test = DecisionTreeBuilder.classify(tree, rawData[20000 + i]);
             if(test == rawData[20000 + i].getPopularity())
                 correct++;
             System.out.print("ACTUAL: " + rawData[20000 + i].getPopularity());
