@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 public class BootStrapTreeBuilder extends DecisionTreeBuilder {
@@ -26,8 +27,10 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
     @Override
     public Node generateDecisionTree(Article[] data){
         Node[] trees = new Node[width];
-        for(int i = 0; i < width; i++)
-            trees[i] = super.generateDecisionTree(sample(data, depth));
+        for(int i = 0; i < width; i++){
+            final int index = i;
+            pool.execute(() -> trees[index] = super.generateDecisionTree(sample(data, depth)));
+        }
         return refineTree(data, combineOrPrune(trees));
     }
 
