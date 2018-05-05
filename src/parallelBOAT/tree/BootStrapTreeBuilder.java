@@ -7,12 +7,15 @@ import parallelBOAT.ImpurityFunction;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 public class BootStrapTreeBuilder extends DecisionTreeBuilder {
 
     protected int width, depth;
+    protected ForkJoinPool pool = new ForkJoinPool();
 
     public BootStrapTreeBuilder(Article[] data, ImpurityFunction imp, int width, int depth){
         super(data, imp);
@@ -85,22 +88,39 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
     private double getExactSplit(Article[] data, Attribute attribute, double[] range){
         // Sort data by attribute value
         Arrays.sort(range);
-        double bestSplit = Double.NaN;
-        double bestImp = Double.POSITIVE_INFINITY;
 
+        ArrayList<ForkJoinTask<double[]>> bests = new ArrayList<>(range.length);
         // Check each split point for best
-        for(double split : range) {
-            ArrayList<Article> left = new ArrayList<>();
-            ArrayList<Article> right = new ArrayList<>();
-            splitData(data, left, right, attribute, split);
-            double currentImp = imp.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0]));
-            if(currentImp < bestImp) {
-                bestImp = currentImp;
-                bestSplit = split;
-            }
+        for (double split : range) {
+            bests.add(pool.submit(() -> {
+                double bestSplit = Double.NaN;
+                double bestImp = Double.POSITIVE_INFINITY;
+                ArrayList<Article> left = new ArrayList<>();
+                ArrayList<Article> right = new ArrayList<>();
+                splitData(data, left, right, attribute, split);
+                double currentImp = imp.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0]));
+                if (currentImp < bestImp) {
+                    bestImp = currentImp;
+                    bestSplit = split;
+                }
+                return new double[]{bestImp, bestSplit};
+            }));
         }
 
         // Return best split point
+        double bestSplit = Double.NaN;
+        double bestImp = Double.POSITIVE_INFINITY;
+        for( ForkJoinTask<double[]> task : bests){
+            try{
+                double currentImp = task.get()[0];
+                if (currentImp < bestImp) {
+                    bestImp = currentImp;
+                    bestSplit = task.get()[1];
+                }
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+        }
         return bestSplit;
     }
 
@@ -117,7 +137,7 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
     }
 
     private InternalNode combine(InternalNode[] trees){
-        if(trees[0].getSplitPoint() == Double.NaN) //boolean split
+        if(Double.isNaN(trees[0].getSplitPoint())) //boolean split
             return new InternalNode(trees[0]);
         double[] splitPoints = Arrays.stream(trees).mapToDouble(InternalNode::getSplitPoint).toArray();
         double confLevel = 1.96; //95% confidence
