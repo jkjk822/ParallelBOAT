@@ -2,9 +2,6 @@ package parallelBOAT.tree;
 
 import javafx.util.Pair;
 import parallelBOAT.*;
-import parallelBOAT.tree.InternalNode;
-import parallelBOAT.tree.LeafNode;
-import parallelBOAT.tree.Node;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -34,7 +31,7 @@ public class DecisionTreeBuilder {
             return ((LeafNode) tree).getClassLabel();
         }
         double splitPoint = ((InternalNode) tree).getSplitPoint();
-        if(direction(article, ((InternalNode) tree).getSplitAttribute(), splitPoint) == 1) {
+        if(direction(article, ((InternalNode) tree).getSplitAttribute(), splitPoint) == RIGHT) {
             return classify(tree.getRightChild(), article);
         } else {
             return classify(tree.getLeftChild(), article);
