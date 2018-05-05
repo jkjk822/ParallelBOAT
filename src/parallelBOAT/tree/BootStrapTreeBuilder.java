@@ -31,6 +31,7 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
             final int index = i;
             pool.execute(() -> trees[index] = super.generateDecisionTree(sample(data, depth)));
         }
+        pool.awaitQuiescence(width*depth, TimeUnit.MILLISECONDS);
         return refineTree(data, combineOrPrune(trees));
     }
 
