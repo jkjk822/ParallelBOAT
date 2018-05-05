@@ -1,6 +1,6 @@
 package parallelBOAT;
 
-import parallelBOAT.tree.Node;
+import parallelBOAT.tree.BootStrapTreeBuilder;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

@@ -1,6 +1,7 @@
-package parallelBOAT;
+package parallelBOAT.tree;
 
 import javafx.util.Pair;
+import parallelBOAT.*;
 import parallelBOAT.tree.InternalNode;
 import parallelBOAT.tree.LeafNode;
 import parallelBOAT.tree.Node;

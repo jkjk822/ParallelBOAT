@@ -1,9 +1,8 @@
-package parallelBOAT;
+package parallelBOAT.tree;
 
-import parallelBOAT.tree.ConfidenceNode;
-import parallelBOAT.tree.InternalNode;
-import parallelBOAT.tree.LeafNode;
-import parallelBOAT.tree.Node;
+import parallelBOAT.Article;
+import parallelBOAT.Attribute;
+import parallelBOAT.ImpurityFunction;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
