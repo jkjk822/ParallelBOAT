@@ -24,7 +24,11 @@ public class DecisionTreeBuilder {
         this.imp = imp;
     }
 
-    public Popularity classify(Node tree, Article article) {
+    public Popularity classify(Article article) {
+        return classify(tree, article);
+    }
+
+    private Popularity classify(Node tree, Article article) {
         if(tree instanceof LeafNode) {
             return ((LeafNode) tree).getClassLabel();
         }
@@ -49,7 +53,7 @@ public class DecisionTreeBuilder {
     }
 
     private Node generateDecisionTree(Article[] data, ArrayList<Attribute> attributes, int level) {
-        System.out.println(level);
+//        System.out.println(level);
         // If all articles are same class -> return leaf node
         if(getClass(data) != Popularity.MULTI) {
             return new LeafNode(getClass(data));

@@ -38,7 +38,7 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
     }
 
     private Node refineTree(Article[] data, Node n){
-        if(n instanceof LeafNode)
+        if(n == null || n instanceof LeafNode)
             return n;
         ArrayList<Article> left = new ArrayList<>();
         ArrayList<Article> right = new ArrayList<>();
@@ -66,6 +66,8 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
                         .toArray())
         );
         splitData(mid.toArray(new Article[0]),left, right, att, exact.getSplitPoint());
+        exact.setLeftChild(n.getLeftChild());
+        exact.setRightChild(n.getRightChild());
         return exact;
     }
 
@@ -120,11 +122,11 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
             return new InternalNode(trees[0]);
         double[] splitPoints = Arrays.stream(trees).mapToDouble(InternalNode::getSplitPoint).toArray();
         double confLevel = 1.96; //95% confidence
-        return new ConfidenceNode(trees[0], computeConfidence(splitPoints, confLevel));
+        double mean = Arrays.stream(splitPoints).sum() / splitPoints.length;
+        return new ConfidenceNode(trees[0], mean, computeConfidence(splitPoints, mean, confLevel));
     }
 
-    private double computeConfidence(double[] values, double conf){
-        double mean = Arrays.stream(values).sum() / values.length;
+    private double computeConfidence(double[] values, double mean, double conf){
         double std = Math.sqrt(
                 Arrays.stream(values)
                 .map(x -> (x - mean)*(x - mean))

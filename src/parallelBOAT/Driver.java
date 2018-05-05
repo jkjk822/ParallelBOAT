@@ -10,9 +10,6 @@ import java.util.*;
 public class Driver {
 
 
-    public static ImpurityFunction imp;
-
-
     //TODO: make Double.NaN a constant
     public static void main(String [] args) {
 
@@ -21,7 +18,7 @@ public class Driver {
         String file = "./resources/OnlineNewsPopularity.csv";
         String line = "";
 
-        imp = chooseImpurityFunction();
+        ImpurityFunction imp = chooseImpurityFunction();
 
         try {
             br = new BufferedReader(new FileReader(file));
@@ -48,7 +45,8 @@ public class Driver {
         }
 
 //        DecisionTreeBuilder.generateDecisionTree(rawData);
-//        BootStrap.generateBOATTree(rawData, 10, 1000);
+        BootStrapTreeBuilder b = new BootStrapTreeBuilder(rawData, imp, 2, 2000);
+        b.generateDecisionTree();
 
 
 
@@ -64,13 +62,13 @@ public class Driver {
 //        System.out.println(rawData[0].getShares());
 
 
-        Article[] newdata = Arrays.copyOfRange(rawData, 0, 5000);
-        Node tree = DecisionTreeBuilder.generateDecisionTree(newdata);
+//        Article[] newdata = Arrays.copyOfRange(rawData, 0, 5000);
+//        Node tree = DecisionTreeBuilder.generateDecisionTree(newdata);
         System.out.println("DONE");
 
         int correct = 0;
         for(int i = 0; i < 100; i++) {
-            Popularity test = DecisionTreeBuilder.classify(tree, rawData[20000 + i]);
+            Popularity test = b.classify(rawData[20000 + i]);
             if(test == rawData[20000 + i].getPopularity())
                 correct++;
             System.out.print("ACTUAL: " + rawData[20000 + i].getPopularity());
