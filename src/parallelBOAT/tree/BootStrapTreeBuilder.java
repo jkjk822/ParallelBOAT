@@ -2,6 +2,7 @@ package parallelBOAT.tree;
 
 import parallelBOAT.Article;
 import parallelBOAT.Attribute;
+import parallelBOAT.CompareByAttribute;
 import parallelBOAT.ImpurityFunction;
 
 import java.lang.reflect.Array;
@@ -25,14 +26,27 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
     }
 
     @Override
-    public Node generateDecisionTree(Article[] data){
+    protected Node generateDecisionTree(Article[] data) {
+        ArrayList<Attribute> attributes = new ArrayList<>(Arrays.asList(Attribute.values()));
+        attributes.remove(attributes.size()-1);
+        attributes.remove(1);
+        attributes.remove(0);
+        return generateBootStrapDecisionTree(data, new ArrayList<>(attributes));
+    }
+
+    private Node generateBootStrapDecisionTree(Article[] data, ArrayList<Attribute> attributes) {
         Node[] trees = new Node[width];
         for(int i = 0; i < width; i++){
             final int index = i;
-            pool.execute(() -> trees[index] = super.generateDecisionTree(sample(data, depth)));
+            pool.execute(() -> trees[index] = generateDecisionTree(sample(data, depth), new ArrayList<>(attributes), 0));
         }
         pool.awaitQuiescence(width*depth*depth, TimeUnit.SECONDS);
-        return refineTree(data, combineOrPrune(trees));
+        System.out.println(trees[0]);
+        Node partialTree = combineOrPrune(trees);
+        partialTree = refineTree(data, partialTree, attributes);
+        if(partialTree == null)
+            partialTree = generateBootStrapDecisionTree(data, attributes);
+        return partialTree;
     }
 
     private Article[] sample(Article[] data, int size){
@@ -43,24 +57,54 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         return sample;
     }
 
-    private Node refineTree(Article[] data, Node n){
+    private Node refineTree(Article[] data, Node n, ArrayList<Attribute> attributes){
         if(n == null || n instanceof LeafNode)
             return n;
+        InternalNode node = (InternalNode) n;
         ArrayList<Article> left = new ArrayList<>();
         ArrayList<Article> right = new ArrayList<>();
-        if(n instanceof ConfidenceNode) {
-            n = refineNode(data, (ConfidenceNode) n, left, right);
+        if(node instanceof ConfidenceNode) {
+            node = refineNode(data, (ConfidenceNode) node, left, right);
         }
         else {
-            InternalNode iNode = (InternalNode) n;
-            splitData(data, left, right, iNode.getSplitAttribute(), iNode.getSplitPoint());
+            splitData(data, left, right, node.getSplitAttribute(), node.getSplitPoint());
         }
-        n.setLeftChild(refineTree(left.toArray(new Article[0]), n.getLeftChild()));
-        n.setRightChild(refineTree(right.toArray(new Article[0]), n.getRightChild()));
-        return n;
+        double estImp = impFunc.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0]));
+        for(Attribute a : attributes){ //TODO: parallel stream
+            if(data[0].getData()[a.getIndex()] instanceof Boolean)
+                if(bestSplitBool(data, a)[0] < estImp)
+                    return null;
+            for(double split : getBuckets(data, a, estImp)){
+                if(impurityOfSplit(data, a, split) < estImp)
+                    return null;
+            }
+        }
+//        attributes.remove(node.getSplitAttribute());
+        node.setLeftChild(refineTree(left.toArray(new Article[0]), node.getLeftChild(), attributes));
+        node.setRightChild(refineTree(right.toArray(new Article[0]), node.getRightChild(), attributes));
+        return node;
     }
 
-    private Node refineNode(Article data[], ConfidenceNode n, ArrayList<Article> left, ArrayList<Article> right){
+    private ArrayList<Double> getBuckets(Article[] data, Attribute attribute, double estImp){
+        ArrayList<Double> buckets = new ArrayList<>();
+        Arrays.sort(data, new CompareByAttribute(attribute));
+        for(int i = 1, j=1; i < data.length; i+=j, j++) {
+            Article[] left = Arrays.copyOfRange(data, 0, i);
+            Article[] right = Arrays.copyOfRange(data, i, data.length);
+            double currentImp = impFunc.computeImpurity(left, right);
+            if(currentImp > 1.3*estImp) {
+                j *= 2;
+                j = j < 0 ? data.length-i: j; //handle overflow
+            }
+            else {
+                j /= 2;
+                buckets.add(getDouble(data[i], attribute));
+            }
+        }
+        return buckets;
+    }
+
+    private InternalNode refineNode(Article data[], ConfidenceNode n, ArrayList<Article> left, ArrayList<Article> right){
         ArrayList<Article> mid = new ArrayList<>();
         Attribute att = n.getSplitAttribute();
         splitData(data, left, right, mid, att, n.getSplitPoint(), n.getSplitConfidence());
@@ -68,7 +112,7 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
                 att,
                 getExactSplit(data, att,
                         mid.stream()
-                        .mapToDouble(article -> getDouble(article.getData()[att.getIndex()]))
+                        .mapToDouble(article -> getDouble(article, att))
                         .toArray())
         );
         splitData(mid.toArray(new Article[0]),left, right, att, exact.getSplitPoint());
@@ -79,13 +123,13 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
 
     protected void splitData(Article[] data, ArrayList<Article> left, ArrayList<Article> right, ArrayList<Article> middle, Attribute attribute, double splitPoint, double conf) {
         if (Double.isNaN(splitPoint)) throw new RuntimeException("No confidence interval for booleans");
-        for (Article a : data) {
-            if (direction(a, attribute,  splitPoint - conf) == LEFT)
-                left.add(a);
-            else if (direction(a, attribute,  splitPoint + conf) == RIGHT)
-                right.add(a);
+        for (Article article : data) {
+            if (direction(article, attribute,  splitPoint - conf) == LEFT)
+                left.add(article);
+            else if (direction(article, attribute,  splitPoint + conf) == RIGHT)
+                right.add(article);
             else
-                middle.add(a);
+                middle.add(article);
         }
     }
 
@@ -96,13 +140,12 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         ArrayList<ForkJoinTask<double[]>> bests = new ArrayList<>(range.length);
         // Check each split point for best
         for (double split : range) {
+            //TODO: see if sorting data could vastly improve this
+            //TODO: parallel stream?
             bests.add(pool.submit(() -> {
                 double bestSplit = Double.NaN;
                 double bestImp = Double.POSITIVE_INFINITY;
-                ArrayList<Article> left = new ArrayList<>();
-                ArrayList<Article> right = new ArrayList<>();
-                splitData(data, left, right, attribute, split);
-                double currentImp = imp.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0]));
+                double currentImp = impurityOfSplit(data, attribute, split);
                 if (currentImp < bestImp) {
                     bestImp = currentImp;
                     bestSplit = split;
@@ -128,7 +171,15 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         return bestSplit;
     }
 
+    private double impurityOfSplit(Article[] data, Attribute attribute, double splitPoint){
+        ArrayList<Article> left = new ArrayList<>();
+        ArrayList<Article> right = new ArrayList<>();
+        splitData(data, left, right, attribute, splitPoint);
+        return impFunc.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0]));
+    }
+
     private Node combineOrPrune(Node[] trees){
+        //TODO: make this majority vote
         if(trees[0] == null || !Arrays.stream(trees).allMatch(Predicate.isEqual(trees[0]))) {
             return null;
         }

@@ -163,8 +163,8 @@ public class DecisionTreeBuilder {
             double currentImp = impFunc.computeImpurity(left, right);
             if(currentImp < bestImp) {
                 bestImp = currentImp;
-                bestSplit = (getDouble(data[i-1].getData()[attribute.getIndex()])
-                        + getDouble(data[i-1].getData()[attribute.getIndex()])) / 2;
+                bestSplit = (getDouble(data[i-1], attribute)
+                        + getDouble(data[i-1], attribute)) / 2;
             }
         }
 
@@ -181,7 +181,7 @@ public class DecisionTreeBuilder {
             else
                 return LEFT;
         } else {
-            if (getDouble(article.getData()[attribute.getIndex()]) > splitPoint) {
+            if (getDouble(article, attribute) > splitPoint) {
                 return RIGHT;
             } else {
                 return LEFT;
@@ -189,8 +189,8 @@ public class DecisionTreeBuilder {
         }
     }
 
-    protected double getDouble(Object n){
-        return ((Number) n).doubleValue();
+    protected double getDouble(Article article, Attribute a){
+        return ((Number) article.getData()[a.getIndex()]).doubleValue();
     }
 
 }
