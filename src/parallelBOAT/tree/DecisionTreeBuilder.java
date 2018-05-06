@@ -22,6 +22,39 @@ public class DecisionTreeBuilder {
         this.impFunc = impFunc;
     }
 
+    public boolean isEqual(Node otherTree) {
+        return isEqual(this.tree, otherTree);
+    }
+
+    private boolean isEqual(Node a, Node b) {
+        if(a instanceof LeafNode) {
+            // Node types dont match
+            if(b instanceof InternalNode)
+                return false;
+            return compareLeaf((LeafNode) a, (LeafNode) b);
+        } else {
+            // Node types dont match
+            if(b instanceof LeafNode)
+                return false;
+            if(compareInternal((InternalNode) a, (InternalNode) b))
+                return isEqual(a.getLeftChild(), b.getLeftChild()) && isEqual(a.getRightChild(), b.getRightChild());
+            return false;
+        }
+    }
+
+    private boolean compareLeaf(LeafNode a, LeafNode b) {
+        return a.getClassLabel() == b.getClassLabel();
+    }
+
+    private boolean compareInternal(InternalNode a, InternalNode b) {
+        if(a.getSplitAttribute() == b.getSplitAttribute()) {
+            if(a.getSplitPoint() == b.getSplitPoint() || Double.isNaN(a.getSplitPoint()))
+                return true;
+        }
+        return false;
+    }
+
+
     public Popularity classify(Article article) {
         return classify(tree, article);
     }
@@ -191,4 +224,7 @@ public class DecisionTreeBuilder {
         return ((Number) article.getData()[a.getIndex()]).doubleValue();
     }
 
+    public Node getTree() {
+        return tree;
+    }
 }

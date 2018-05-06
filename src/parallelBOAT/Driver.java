@@ -67,6 +67,16 @@ public class Driver {
 ////        Arrays.sort(rawData, new CompareByAttribute(Attribute.shares));
 //        System.out.println(rawData[0].getShares());
 
+        // is equal testing:
+//        Article[] aData = Arrays.copyOfRange(rawData, 0, 100);
+//        Article[] bData = Arrays.copyOfRange(rawData,100, 200);
+//        DecisionTreeBuilder a = new DecisionTreeBuilder(aData, imp);
+//        a.generateDecisionTree();
+//        DecisionTreeBuilder b = new DecisionTreeBuilder(bData, imp);
+//        b.generateDecisionTree();
+//
+//        System.out.println(a.isEqual(b.getTree()));
+
         int classifySize = rawData.length / 4;
         randomizeData(classifySize, rawData);
         Article[] trainingData = Arrays.copyOfRange(rawData, 0, rawData.length - classifySize);
