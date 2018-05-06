@@ -47,7 +47,7 @@ public class DecisionTreeBuilder {
         attributes.remove(attributes.size()-1);
         attributes.remove(1);
         attributes.remove(0);
-        return generateDecisionTree(data, new ArrayList<>(attributes),0);
+        return generateDecisionTree(data, attributes,0);
     }
 
     protected Node generateDecisionTree(Article[] data, ArrayList<Attribute> attributes, int level) {
@@ -70,20 +70,18 @@ public class DecisionTreeBuilder {
 
         splitData(data, left, right, bestSplit.getKey(), bestSplit.getValue());
         attributes.remove(bestSplit.getKey());
-        ArrayList<Attribute> leftAttributes = new ArrayList<>(attributes);
-        ArrayList<Attribute> rightAttributes = new ArrayList<>(attributes);
 
         // Build internal Node
         InternalNode node = new InternalNode(bestSplit.getKey(), bestSplit.getValue());
         if(left.isEmpty())
             node.setLeftChild(new LeafNode(getMajorityClass(data)));
         else
-            node.setLeftChild(generateDecisionTree(left.toArray(new Article[0]), leftAttributes, level + 1));
+            node.setLeftChild(generateDecisionTree(left.toArray(new Article[0]), new ArrayList<>(attributes), level + 1));
 
         if(right.isEmpty())
             node.setRightChild(new LeafNode(getMajorityClass(data)));
         else
-            node.setRightChild(generateDecisionTree(right.toArray(new Article[0]), rightAttributes, level + 1));
+            node.setRightChild(generateDecisionTree(right.toArray(new Article[0]), new ArrayList<>(attributes), level + 1));
 
         return node;
     }
