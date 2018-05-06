@@ -12,14 +12,14 @@ public class DecisionTreeBuilder {
 
     protected Article[] data;
     protected Node tree;
-    protected ImpurityFunction imp;
+    protected ImpurityFunction impFunc;
 
     public DecisionTreeBuilder(){
     }
 
-    public DecisionTreeBuilder(Article[] data, ImpurityFunction imp){
+    public DecisionTreeBuilder(Article[] data, ImpurityFunction impFunc){
         this.data =  data;
-        this.imp = imp;
+        this.impFunc = impFunc;
     }
 
     public Popularity classify(Article article) {
@@ -50,7 +50,7 @@ public class DecisionTreeBuilder {
         return generateDecisionTree(data, new ArrayList<>(attributes),0);
     }
 
-    private Node generateDecisionTree(Article[] data, ArrayList<Attribute> attributes, int level) {
+    protected Node generateDecisionTree(Article[] data, ArrayList<Attribute> attributes, int level) {
 //        System.out.println(level);
         // If all articles are same class -> return leaf node
         if(getClass(data) != Popularity.MULTI) {
@@ -118,7 +118,7 @@ public class DecisionTreeBuilder {
         }
     }
 
-    private Pair<Attribute, Double> chooseBestAttribute(Article[] data, ArrayList<Attribute> attributes) {
+    protected Pair<Attribute, Double> chooseBestAttribute(Article[] data, ArrayList<Attribute> attributes) {
         Attribute bestAttribute = attributes.get(0);
         double bestSplit = Double.NaN;
         double bestImp = Double.POSITIVE_INFINITY;
@@ -143,14 +143,14 @@ public class DecisionTreeBuilder {
         return bestSplitDouble(data, attribute);
     }
 
-    private double[] bestSplitBool(Article[] data, Attribute attribute){
+    protected double[] bestSplitBool(Article[] data, Attribute attribute){
         ArrayList<Article> left = new ArrayList<>();
         ArrayList<Article> right = new ArrayList<>();
         splitData(data, left, right, attribute, Double.NaN);
-        return new double[]{imp.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0])), Double.NaN};
+        return new double[]{impFunc.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0])), Double.NaN};
     }
 
-    private double[] bestSplitDouble(Article[] data, Attribute attribute){
+    protected double[] bestSplitDouble(Article[] data, Attribute attribute){
         // Sort data by attribute value
         Arrays.sort(data, new CompareByAttribute(attribute));
         double bestSplit = Double.NaN;
@@ -160,7 +160,7 @@ public class DecisionTreeBuilder {
         for(int i = 1; i < data.length; i++) {
             Article[] left = Arrays.copyOfRange(data, 0, i);
             Article[] right = Arrays.copyOfRange(data, i, data.length);
-            double currentImp = imp.computeImpurity(left, right);
+            double currentImp = impFunc.computeImpurity(left, right);
             if(currentImp < bestImp) {
                 bestImp = currentImp;
                 bestSplit = (getDouble(data[i-1].getData()[attribute.getIndex()])
@@ -174,6 +174,7 @@ public class DecisionTreeBuilder {
 
     // Classify as left or right for a split point and attribute
     protected int direction(Article article, Attribute attribute, double splitPoint) {
+        //TODO: Rewrite to return function instead of testing for bool each iteration
         if(Double.isNaN(splitPoint)) {
             if((boolean)article.getData()[attribute.getIndex()])
                 return RIGHT;
