@@ -1,36 +1,40 @@
 # parallelBOAT
 Parallel implementation of the decision tree building BOAT algorithm.
 
+## Running Instructions
+
+This project was developed in Intellij, so we highly recommend building and running it through there
+
 ## Overview of Files
 
 ### General Package
 
-- Article
+- Article.java
     - Class to hold all data for an article
-- Attribute
+- Attribute.java
     - Enum describing each of the 61 attributes of an article
-- CompareByAttribute
+- CompareByAttribute.java
     - Custom class to compare articles by a given attribute
-- Driver
+- Driver.java
     - Main method to run and test program
-- ImpurityFunction
+- ImpurityFunction.java
     - Interface to allow future extension of more measures than just Gini index
-- Popularity
+- Popularity.java
     - Enum describing the popularity classes
 
 ### Tree Package
 
-- BootStrapTreeBuilder
+- BootStrapTreeBuilder.java
     - Bootstrap tree algorithm class
-- ConfidenceNode
+- ConfidenceNode.java
     - Node used for combining trees within BOAT algorithm
-- DecisionTreeBuilder
+- DecisionTreeBuilder.java
     - Decision tree class, holds classification and original build method
-- InternalNode
+- InternalNode.java
     - Splitting node for DT
-- LeafNode
+- LeafNode.java
     - Classification node for DT
-- Node
+- Node.java
     - Abstract node class (all others extend this)
 
 ### TODO:
