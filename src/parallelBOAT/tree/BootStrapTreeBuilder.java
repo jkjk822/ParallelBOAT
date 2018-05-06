@@ -8,6 +8,8 @@ import parallelBOAT.ImpurityFunction;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.ThreadLocalRandom;
@@ -31,10 +33,13 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         attributes.remove(attributes.size()-1);
         attributes.remove(1);
         attributes.remove(0);
-        return generateBootStrapDecisionTree(data, new ArrayList<>(attributes));
+        return generateBootStrapDecisionTree(data, attributes);
     }
 
     private Node generateBootStrapDecisionTree(Article[] data, ArrayList<Attribute> attributes) {
+        if(data.length < 2000)
+            return generateDecisionTree(data, new ArrayList<>(attributes), 0);
+
         Node[] trees = new Node[width];
         for(int i = 0; i < width; i++){
             final int index = i;
@@ -43,9 +48,8 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         pool.awaitQuiescence(width*depth*depth, TimeUnit.SECONDS);
         System.out.println(trees[0]);
         Node partialTree = combineOrPrune(trees);
-        partialTree = refineTree(data, partialTree, attributes);
-        if(partialTree == null)
-            partialTree = generateBootStrapDecisionTree(data, attributes);
+        partialTree = refineTree(data, partialTree, new ArrayList<>(attributes));
+        partialTree = perfect(data, partialTree, new ArrayList<>(attributes));
         return partialTree;
     }
 
@@ -71,33 +75,66 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         }
         double estImp = impFunc.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0]));
         for(Attribute a : attributes){ //TODO: parallel stream
-            if(data[0].getData()[a.getIndex()] instanceof Boolean)
-                if(bestSplitBool(data, a)[0] < estImp)
-                    return null;
-            for(double split : getBuckets(data, a, estImp)){
-                if(impurityOfSplit(data, a, split) < estImp)
+            if(data[0].getData()[a.getIndex()] instanceof Boolean) {
+                if (bestSplitBool(data, a)[0] < estImp)
                     return null;
             }
+            else {
+                for (double split : getBuckets(data, a, estImp))
+                    if (impurityOfSplit(data, a, split) < estImp)
+                        return null;
+                }
         }
-//        attributes.remove(node.getSplitAttribute());
-        node.setLeftChild(refineTree(left.toArray(new Article[0]), node.getLeftChild(), attributes));
-        node.setRightChild(refineTree(right.toArray(new Article[0]), node.getRightChild(), attributes));
+        attributes.remove(node.getSplitAttribute());
+        node.setLeftChild(
+                perfect(left.toArray(new Article[0]),
+                        refineTree(left.toArray(new Article[0]), node.getLeftChild(), new ArrayList<>(attributes)),
+                        new ArrayList<>(attributes))
+        );
+        node.setRightChild(
+                perfect(right.toArray(new Article[0]),
+                        refineTree(right.toArray(new Article[0]), node.getRightChild(), new ArrayList<>(attributes)),
+                        new ArrayList<>(attributes))
+        );
         return node;
     }
 
-    private ArrayList<Double> getBuckets(Article[] data, Attribute attribute, double estImp){
-        ArrayList<Double> buckets = new ArrayList<>();
+    private Node perfect(Article[] data, Node n, ArrayList<Attribute> attributes){
+        while(n == null)
+            n = generateBootStrapDecisionTree(data,  attributes);
+        if(n instanceof LeafNode)
+            return n;
+        InternalNode node = (InternalNode) n;
+        attributes.remove(node.getSplitAttribute());
+        ArrayList<Article> left = new ArrayList<>();
+        ArrayList<Article> right = new ArrayList<>();
+        splitData(data, left, right, node.getSplitAttribute(), node.getSplitPoint());
+        node.setLeftChild(perfect(left.toArray(new Article[0]), node.getLeftChild(), new ArrayList<>(attributes)));
+        node.setRightChild(perfect(right.toArray(new Article[0]), node.getRightChild(), new ArrayList<>(attributes)));
+        return node;
+    }
+
+    private Set<Double> getBuckets(Article[] data, Attribute attribute, double estImp){
+        Set<Double> buckets = new HashSet<>();
         Arrays.sort(data, new CompareByAttribute(attribute));
-        for(int i = 1, j=1; i < data.length; i+=j, j++) {
+        double tolerance = .01;
+        for(int i = 1, j=data.length/100; i < data.length; j++, i+=j) {
             Article[] left = Arrays.copyOfRange(data, 0, i);
             Article[] right = Arrays.copyOfRange(data, i, data.length);
             double currentImp = impFunc.computeImpurity(left, right);
-            if(currentImp > 1.3*estImp) {
-                j *= 2;
-                j = j < 0 ? data.length-i: j; //handle overflow
+            if(currentImp > estImp+tolerance) {
+                j *= 1.5;
+                tolerance*=1.2;
+                j = j < 0 ? 1+data.length/10: j; //handle overflow
+                if(j > data.length/10){
+                    j = data.length/10;
+                    buckets.add(getDouble(data[i], attribute));
+                }
             }
             else {
-                j /= 2;
+                j /= 1.5;
+                tolerance /= 1.2;
+                j = Math.max(data.length/100, j);
                 buckets.add(getDouble(data[i], attribute));
             }
         }
