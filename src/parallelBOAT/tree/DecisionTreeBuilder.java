@@ -14,18 +14,22 @@ public class DecisionTreeBuilder {
     protected Node tree;
     protected ImpurityFunction impFunc;
 
+    // Empty Constructor
     public DecisionTreeBuilder(){
     }
 
+    // Data and impurity Constructor
     public DecisionTreeBuilder(Article[] data, ImpurityFunction impFunc){
         this.data =  data;
         this.impFunc = impFunc;
     }
 
+    // Compare method exposed
     public boolean isEqual(Node otherTree) {
         return isEqual(this.tree, otherTree);
     }
 
+    // Compare trees for equivalence
     private boolean isEqual(Node a, Node b) {
         if(a instanceof LeafNode) {
             // Node types dont match
@@ -54,11 +58,12 @@ public class DecisionTreeBuilder {
         return false;
     }
 
-
+    // Exposed classify method
     public Popularity classify(Article article) {
         return classify(tree, article);
     }
 
+    // Classify an articles popularity using our decision tree
     private Popularity classify(Node tree, Article article) {
         if(tree instanceof LeafNode) {
             return ((LeafNode) tree).getClassLabel();
@@ -71,10 +76,12 @@ public class DecisionTreeBuilder {
         }
     }
 
+    // Exposed method, build tree
     public void generateDecisionTree() {
         tree = generateDecisionTree(data);
     }
 
+    // Build tree method, used by BOAT
     protected Node generateDecisionTree(Article[] data) {
         ArrayList<Attribute> attributes = new ArrayList<>(Arrays.asList(Attribute.values()));
         attributes.remove(attributes.size()-1);
@@ -83,8 +90,8 @@ public class DecisionTreeBuilder {
         return generateDecisionTree(data, attributes,0);
     }
 
+    // Basic decision tree building algorithm
     protected Node generateDecisionTree(Article[] data, ArrayList<Attribute> attributes, int level) {
-//        System.out.println(level);
         // If all articles are same class -> return leaf node
         if(getClass(data) != Popularity.MULTI) {
             return new LeafNode(getClass(data));
@@ -119,6 +126,7 @@ public class DecisionTreeBuilder {
         return node;
     }
 
+    // Helper method to return the Popularity class of data (LOW, HIGH, VIRAL, or MULTI if multiple classes are present)
     private Popularity getClass(Article [] data) {
         Popularity p = data[0].getPopularity();
         if(Arrays.stream(data).map(Article::getPopularity).allMatch(Predicate.isEqual(p)))
@@ -127,6 +135,7 @@ public class DecisionTreeBuilder {
             return Popularity.MULTI;
     }
 
+    // Given a data set, return majority class
     private Popularity getMajorityClass(Article [] data) {
         //TODO: implement same way as gini?
         HashMap<Popularity, Integer> count = new HashMap<>();
@@ -140,6 +149,7 @@ public class DecisionTreeBuilder {
 
     }
 
+    // Splits data based on attribute and split point
     protected void splitData(Article[] data, ArrayList<Article> left, ArrayList<Article> right, Attribute attribute, double splitPoint) {
         for (Article article : data) {
             if(direction(article, attribute, splitPoint) == RIGHT)
@@ -149,13 +159,16 @@ public class DecisionTreeBuilder {
         }
     }
 
+    // Find best attribute and corresponding split point for dataset and available attributes
     protected Pair<Attribute, Double> chooseBestAttribute(Article[] data, ArrayList<Attribute> attributes) {
         Attribute bestAttribute = attributes.get(0);
         double bestSplit = Double.NaN;
         double bestImp = Double.POSITIVE_INFINITY;
 
+        // Check each available attribute
         for(Attribute a : attributes) {
             double[] result = bestSplit(data, a);
+            // if impurity is better (lower) than current best, update
             if(result[0] < bestImp) {
                 bestAttribute = a;
                 bestImp = result[0];
@@ -165,7 +178,9 @@ public class DecisionTreeBuilder {
 
         return new Pair<>(bestAttribute, bestSplit);
     }
+
     //TODO: use arraylists instead of arrays
+    // Find best split point
     protected double[] bestSplit(Article [] data, Attribute attribute) {
         // If boolean we already know best split point
         if(data[0].getData()[attribute.getIndex()] instanceof Boolean) {
@@ -174,6 +189,7 @@ public class DecisionTreeBuilder {
         return bestSplitDouble(data, attribute);
     }
 
+    // Find best split point for boolean (used by BOAT)
     protected double[] bestSplitBool(Article[] data, Attribute attribute){
         ArrayList<Article> left = new ArrayList<>();
         ArrayList<Article> right = new ArrayList<>();
@@ -181,6 +197,7 @@ public class DecisionTreeBuilder {
         return new double[]{impFunc.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0])), Double.NaN};
     }
 
+    // Find best split point for double attribute (used by BOAT)
     protected double[] bestSplitDouble(Article[] data, Attribute attribute){
         // Sort data by attribute value
         Arrays.sort(data, new CompareByAttribute(attribute));
@@ -220,10 +237,12 @@ public class DecisionTreeBuilder {
         }
     }
 
+    // Return double value of an attribute
     protected double getDouble(Article article, Attribute a){
         return ((Number) article.getData()[a.getIndex()]).doubleValue();
     }
 
+    // Public getter for decision tree
     public Node getTree() {
         return tree;
     }
