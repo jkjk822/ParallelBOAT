@@ -100,9 +100,9 @@ public class DecisionTreeBuilder {
         //TODO: implement same way as gini?
         HashMap<Popularity, Integer> count = new HashMap<>();
 
-        for (Article a : data) {
-            count.putIfAbsent(a.getPopularity(), 0);
-            count.put(a.getPopularity(), count.get(a.getPopularity()) + 1);
+        for (Article article : data) {
+            count.putIfAbsent(article.getPopularity(), 0);
+            count.put(article.getPopularity(), count.get(article.getPopularity()) + 1);
         }
 
         return Collections.max(count.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
@@ -110,11 +110,11 @@ public class DecisionTreeBuilder {
     }
 
     protected void splitData(Article[] data, ArrayList<Article> left, ArrayList<Article> right, Attribute attribute, double splitPoint) {
-        for (Article a : data) {
-            if(direction(a, attribute, splitPoint) == RIGHT)
-                right.add(a);
+        for (Article article : data) {
+            if(direction(article, attribute, splitPoint) == RIGHT)
+                right.add(article);
             else
-                left.add(a);
+                left.add(article);
         }
     }
 
