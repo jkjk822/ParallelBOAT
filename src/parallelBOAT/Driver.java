@@ -1,10 +1,14 @@
 package parallelBOAT;
 
 import parallelBOAT.tree.BootStrapTreeBuilder;
+import parallelBOAT.tree.DecisionTreeBuilder;
+import parallelBOAT.tree.Node;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Driver {
@@ -45,8 +49,10 @@ public class Driver {
         }
 
 //        DecisionTreeBuilder.generateDecisionTree(rawData);
-        BootStrapTreeBuilder b = new BootStrapTreeBuilder(rawData, imp, 2, 2000);
-        b.generateDecisionTree();
+
+
+//        BootStrapTreeBuilder b = new BootStrapTreeBuilder(rawData, imp, 2, 2000);
+//        b.generateDecisionTree();
 
 
 
@@ -61,21 +67,30 @@ public class Driver {
 ////        Arrays.sort(rawData, new CompareByAttribute(Attribute.shares));
 //        System.out.println(rawData[0].getShares());
 
+        int classifySize = rawData.length / 4;
+        randomizeData(classifySize, rawData);
+        Article[] trainingData = Arrays.copyOfRange(rawData, 0, rawData.length - classifySize);
+        Article[] classifyData = Arrays.copyOfRange(rawData,rawData.length - classifySize, rawData.length);
+        DecisionTreeBuilder b = new DecisionTreeBuilder(trainingData, chooseImpurityFunction());
+        long startTime = System.currentTimeMillis();
+        b.generateDecisionTree();
+        long endTime = System.currentTimeMillis();
 
-//        Article[] newdata = Arrays.copyOfRange(rawData, 0, 5000);
-//        Node tree = DecisionTreeBuilder.generateDecisionTree(newdata);
         System.out.println("DONE");
 
+
         int correct = 0;
-        for(int i = 0; i < 100; i++) {
-            Popularity test = b.classify(rawData[20000 + i]);
-            if(test == rawData[20000 + i].getPopularity())
+        for( Article a : classifyData) {
+            Popularity test = b.classify(a);
+            if(test == a.getPopularity())
                 correct++;
-            System.out.print("ACTUAL: " + rawData[20000 + i].getPopularity());
-            System.out.println(", CLASSIFIED: " + test);
+//            System.out.print("ACTUAL: " + rawData[20000 + i].getPopularity());
+//            System.out.println(", CLASSIFIED: " + test);
         }
 
-        System.out.println(correct);
+        double accuracy = (double) correct / (double) classifyData.length;
+        System.out.println("Accuracy: " + accuracy);
+        System.out.println("Build time (s): " + ((endTime - startTime) / 1000));
 
     }
 
