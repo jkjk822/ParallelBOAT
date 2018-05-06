@@ -79,6 +79,16 @@ public class Driver {
 
     }
 
+    private static void randomizeData(int sampleSize, Article[] rawData) {
+        Random rand = new Random();
+        for(int i = 1; i < sampleSize + 1; i++) {
+            int select = rand.nextInt(rawData.length - i);
+            Article temp = rawData[rawData.length - i];
+            rawData[rawData.length - i] = rawData[select];
+            rawData[select] = temp;
+        }
+    }
+
 
     private static ImpurityFunction chooseImpurityFunction(){
         //if input = gini index
