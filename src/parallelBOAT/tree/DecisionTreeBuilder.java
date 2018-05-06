@@ -11,7 +11,7 @@ public class DecisionTreeBuilder {
     protected static final int RIGHT = 1;
 
     protected Article[] data;
-    protected Node tree;
+    protected Node decisionTree;
     protected ImpurityFunction impFunc;
 
     public DecisionTreeBuilder(){
@@ -23,7 +23,7 @@ public class DecisionTreeBuilder {
     }
 
     public boolean isEqual(Node otherTree) {
-        return isEqual(this.tree, otherTree);
+        return isEqual(this.decisionTree, otherTree);
     }
 
     private boolean isEqual(Node a, Node b) {
@@ -56,7 +56,7 @@ public class DecisionTreeBuilder {
 
 
     public Popularity classify(Article article) {
-        return classify(tree, article);
+        return classify(decisionTree, article);
     }
 
     private Popularity classify(Node tree, Article article) {
@@ -72,7 +72,7 @@ public class DecisionTreeBuilder {
     }
 
     public void generateDecisionTree() {
-        tree = generateDecisionTree(data);
+        decisionTree = generateDecisionTree(data);
     }
 
     protected Node generateDecisionTree(Article[] data) {
@@ -224,7 +224,7 @@ public class DecisionTreeBuilder {
         return ((Number) article.getData()[a.getIndex()]).doubleValue();
     }
 
-    public Node getTree() {
-        return tree;
+    public Node getDecisionTree() {
+        return decisionTree;
     }
 }
