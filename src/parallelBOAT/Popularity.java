@@ -1,5 +1,6 @@
 package parallelBOAT;
 
+// Enum describing popularity class
 public enum Popularity {
     LOW, //under 1000
     HIGH, //under 10,000

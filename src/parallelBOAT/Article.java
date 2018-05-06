@@ -1,7 +1,9 @@
 package parallelBOAT;
 
+// Class that describes an article
 public class Article {
 
+    // Raw data array used to quickly access attribute values
     private Object[] collect = new Object[0];
 
     private Popularity popularity;
@@ -68,6 +70,7 @@ public class Article {
     private int shares;
 
 
+    // Constructor
     public Article(String[] args) {
         this.url = args[0];
         this.timeDelta = Double.valueOf(args[1]).intValue();
@@ -142,6 +145,7 @@ public class Article {
         return (bool.equals("1.0"));
     }
 
+    // Returns raw data array
     public Object[] getData() {
         if(collect.length!=0)
             return collect;

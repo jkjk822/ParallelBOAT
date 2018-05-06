@@ -1,5 +1,6 @@
 package parallelBOAT;
 
+// Enum describing all attributes of an article
 public enum Attribute {
     url(0),
     timeDelta(1),
@@ -69,6 +70,7 @@ public enum Attribute {
         this.index = index;
     }
 
+    // Returns index of an attribute, used to access objects from the raw data array of article
     public int getIndex() {
         return index;
     }

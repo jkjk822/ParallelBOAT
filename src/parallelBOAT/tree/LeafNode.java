@@ -2,6 +2,7 @@ package parallelBOAT.tree;
 
 import parallelBOAT.Popularity;
 
+// Leaf node class  ---->  These have no children, just a popularity class label
 public class LeafNode extends Node {
 
     private Popularity classLabel;

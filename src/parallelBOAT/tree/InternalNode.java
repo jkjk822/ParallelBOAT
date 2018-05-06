@@ -2,6 +2,7 @@ package parallelBOAT.tree;
 
 import parallelBOAT.Attribute;
 
+// Internal node class  ---->  These have two children, a split attribute, and a split point
 public class InternalNode extends Node{
 
     protected Attribute splitAttribute;
