@@ -2,6 +2,7 @@ package parallelBOAT;
 
 import java.util.Comparator;
 
+// Class created in order to sort data (list of articles) based on a specific attribute value
 public class CompareByAttribute implements Comparator<Article>{
 
     private int index;

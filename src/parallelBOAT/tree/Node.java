@@ -1,5 +1,6 @@
 package parallelBOAT.tree;
 
+// Abstract node class (can be of type internal or leaf)
 public abstract class Node {
     protected Node leftChild;
     protected Node rightChild;
