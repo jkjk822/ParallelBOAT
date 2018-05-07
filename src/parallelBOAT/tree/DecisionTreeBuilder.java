@@ -27,30 +27,14 @@ public class DecisionTreeBuilder {
     }
 
     private boolean isEqual(Node a, Node b) {
-        if(a instanceof LeafNode) {
-            // Node types dont match
-            if(b instanceof InternalNode)
-                return false;
-            return compareLeaf((LeafNode) a, (LeafNode) b);
-        } else {
-            // Node types dont match
-            if(b instanceof LeafNode)
-                return false;
-            if(compareInternal((InternalNode) a, (InternalNode) b))
-                return isEqual(a.getLeftChild(), b.getLeftChild()) && isEqual(a.getRightChild(), b.getRightChild());
+        if(a == null && b == null)
+            return true;
+        else if(a == null)
             return false;
-        }
-    }
-
-    private boolean compareLeaf(LeafNode a, LeafNode b) {
-        return a.getClassLabel() == b.getClassLabel();
-    }
-
-    private boolean compareInternal(InternalNode a, InternalNode b) {
-        if(a.getSplitAttribute() == b.getSplitAttribute()) {
-            if(a.getSplitPoint() == b.getSplitPoint() || Double.isNaN(a.getSplitPoint()))
-                return true;
-        }
+        else if(b == null)
+            return false;
+        if(a.equals(b))
+            return isEqual(a.getLeftChild(), b.getLeftChild()) && isEqual(a.getRightChild(), b.getRightChild());
         return false;
     }
 
