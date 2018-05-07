@@ -104,10 +104,10 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         if(n instanceof LeafNode)
             return n;
         InternalNode node = (InternalNode) n;
-        attributes.remove(node.getSplitAttribute());
         ArrayList<Article> left = new ArrayList<>();
         ArrayList<Article> right = new ArrayList<>();
         splitData(data, left, right, node.getSplitAttribute(), node.getSplitPoint());
+        attributes.remove(node.getSplitAttribute());
         node.setLeftChild(perfect(left.toArray(new Article[0]), node.getLeftChild(), new ArrayList<>(attributes)));
         node.setRightChild(perfect(right.toArray(new Article[0]), node.getRightChild(), new ArrayList<>(attributes)));
         return node;
@@ -151,7 +151,10 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
                         .mapToDouble(article -> getDouble(article, att))
                         .toArray())
         );
-        splitData(mid.toArray(new Article[0]),left, right, att, exact.getSplitPoint());
+        if(mid.isEmpty())
+            exact = new InternalNode(att, n.getSplitPoint());
+        else
+            splitData(mid.toArray(new Article[0]),left, right, att, exact.getSplitPoint());
         exact.setLeftChild(n.getLeftChild());
         exact.setRightChild(n.getRightChild());
         return exact;
