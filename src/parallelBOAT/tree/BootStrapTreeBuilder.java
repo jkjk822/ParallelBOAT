@@ -1,20 +1,10 @@
 package parallelBOAT.tree;
 
-import parallelBOAT.Article;
-import parallelBOAT.Attribute;
-import parallelBOAT.CompareByAttribute;
-import parallelBOAT.ImpurityFunction;
+import parallelBOAT.*;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class BootStrapTreeBuilder extends DecisionTreeBuilder {
 
@@ -39,14 +29,12 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
     private Node generateBootStrapDecisionTree(Article[] data, ArrayList<Attribute> attributes) {
         if(data.length < 2000)
             return generateDecisionTree(data, new ArrayList<>(attributes), 0);
-
         Node[] trees = new Node[width];
         for(int i = 0; i < width; i++){
             final int index = i;
             pool.execute(() -> trees[index] = generateDecisionTree(sample(data, depth), new ArrayList<>(attributes), 0));
         }
         pool.awaitQuiescence(width*depth*depth, TimeUnit.SECONDS);
-        System.out.println(trees[0]);
         Node partialTree = combineOrPrune(trees);
         partialTree = refineTree(data, partialTree, new ArrayList<>(attributes));
         partialTree = perfect(data, partialTree, new ArrayList<>(attributes));
@@ -73,17 +61,28 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         else {
             splitData(data, left, right, node.getSplitAttribute(), node.getSplitPoint());
         }
+
         double estImp = impFunc.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0]));
-        for(Attribute a : attributes){ //TODO: parallel stream
-            if(data[0].getData()[a.getIndex()] instanceof Boolean) {
-                if (bestSplitBool(data, a)[0] < estImp)
-                    return null;
-            }
-            else {
-                for (double split : getBuckets(data, a, estImp))
-                    if (impurityOfSplit(data, a, split) < estImp)
-                        return null;
+
+        ArrayList<Callable<Boolean>> failures = new ArrayList<>(attributes.size());
+        for(Attribute a : attributes){
+            failures.add(() -> {
+                if (data[0].getData()[a.getIndex()] instanceof Boolean) {
+                    if (bestSplitBool(data, a)[0] < estImp)
+                        return true;
+                } else {
+                    for (double split : getBuckets(data, a, estImp))
+                        if (impurityOfSplit(data, a, split) < estImp)
+                            return true;
                 }
+                return false;
+            });
+        }
+        try {
+            if(pool.invokeAny(failures))
+                return null;
+        } catch(Exception e){
+            e.printStackTrace();
         }
         attributes.remove(node.getSplitAttribute());
         node.setLeftChild(
@@ -171,25 +170,11 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
     }
 
     private double getExactSplit(Article[] data, Attribute attribute, double[] range){
-        // Sort data by attribute value
-        Arrays.sort(range);
 
         ArrayList<ForkJoinTask<double[]>> bests = new ArrayList<>(range.length);
-        // Check each split point for best
-        for (double split : range) {
-            //TODO: see if sorting data could vastly improve this
-            //TODO: parallel stream?
-            bests.add(pool.submit(() -> {
-                double bestSplit = Double.NaN;
-                double bestImp = Double.POSITIVE_INFINITY;
-                double currentImp = impurityOfSplit(data, attribute, split);
-                if (currentImp < bestImp) {
-                    bestImp = currentImp;
-                    bestSplit = split;
-                }
-                return new double[]{bestImp, bestSplit};
-            }));
-        }
+        // Check each split point
+        for (double split : range)
+            bests.add(pool.submit(() -> new double[]{impurityOfSplit(data, attribute, split), split}));
 
         // Return best split point
         double bestSplit = Double.NaN;
@@ -216,16 +201,48 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
     }
 
     private Node combineOrPrune(Node[] trees){
-        //TODO: make this majority vote
-        if(trees[0] == null || !Arrays.stream(trees).allMatch(Predicate.isEqual(trees[0]))) {
-            return null;
-        }
-        if(trees[0] instanceof LeafNode)
-            return new LeafNode((LeafNode) trees[0]);
+        trees = keepMajority(trees);
+        if(trees[0] == null || trees[0] instanceof LeafNode)
+            return trees[0];
         InternalNode n = combine(castTo(InternalNode.class, trees));
         n.setLeftChild(combineOrPrune(Arrays.stream(trees).map(Node::getLeftChild).toArray(Node[]::new)));
         n.setRightChild(combineOrPrune(Arrays.stream(trees).map(Node::getRightChild).toArray(Node[]::new)));
         return n;
+    }
+
+    private Node[] keepMajority(Node[] trees){
+        int atts = Attribute.values().length;
+        int pops = Popularity.values().length;
+        int[] count =  new int[atts+pops+2];
+        for(Node tree : trees){
+            if(tree == null)
+                count[atts+pops+1]++;
+            else if(tree instanceof LeafNode)
+                count[atts+((LeafNode)tree).getClassLabel().ordinal()]++;
+            else
+                count[((InternalNode) tree).getSplitAttribute().getIndex()]++;
+        }
+        int max = 0;
+        int index = -1;
+        for(int i = 0; i < count.length; i++){
+            if(count[i] > max) {
+                max = count[i];
+                index = i;
+            }
+        }
+        //Mostly null, or only 1 of everything
+        if(index > atts+pops || max == 1)
+            return new Node[]{null};
+        Node[] newTrees = new Node[max];
+        int i = 0;
+        for(Node tree : trees){
+            if(tree instanceof LeafNode && index == atts+((LeafNode) tree).getClassLabel().ordinal()
+                    || tree instanceof InternalNode && index == ((InternalNode) tree).getSplitAttribute().getIndex()){
+                newTrees[i] = tree;
+                i++;
+            }
+        }
+        return newTrees;
     }
 
     private InternalNode combine(InternalNode[] trees){
