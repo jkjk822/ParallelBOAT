@@ -11,6 +11,9 @@ $ cd <path to project directory>/ParallelBOAT
 $ javac src/parallelBOAT/*.java src/parallelBOAT/tree/java
 $ java -cp src/ parallelBOAT.Driver
 
+**NOTE**: The Driver is currently configured to run both the naive decision tree and BOAT algorithms with 70/30 train/test.
+The estimated runtime for this is about **an hour**.
+
 ## Overview of Files
 
 ### General Package
@@ -42,17 +45,3 @@ $ java -cp src/ parallelBOAT.Driver
     - Classification node for DT
 - Node.java
     - Abstract node class (all others extend this)
-
-### TODO:
-Willie:
-- Convert `data` to `ArrayList<Article>`
-- Rewrite `getMajorityClass`
-
-Johnny:
-- `Double.NaN` as constant
-- Implement BOAT failure recovery
-- Restructure
-    - `BootStrap` into a tree class
-    - `DecisionTree` into class
-    - Relation between two (bootstrap inherits?)
-- Parallelize
