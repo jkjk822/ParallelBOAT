@@ -3,7 +3,13 @@ Parallel implementation of the decision tree building BOAT algorithm.
 
 ## Running Instructions
 
-This project was developed in Intellij, so we highly recommend building and running it through there
+This project was developed in Intellij, so we recommend building and running it through there.
+
+Command Line Run:
+
+$ cd <path to project directory>/ParallelBOAT
+$ javac src/parallelBOAT/*.java src/parallelBOAT/tree/java
+$ java -cp src/ parallelBOAT.Driver
 
 ## Overview of Files
 
