@@ -42,9 +42,9 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         Node[] trees = new Node[width];
         for(int i = 0; i < width; i++){
             final int index = i;
-            trees[index] = generateDecisionTree(sample(data, depth), new ArrayList<>(attributes), 0);
+            pool.execute(() -> trees[index] = generateDecisionTree(sample(data, depth), new ArrayList<>(attributes), 0));
         }
-//        pool.awaitQuiescence(width*depth*depth, TimeUnit.SECONDS);
+        pool.awaitQuiescence(width*depth*depth, TimeUnit.SECONDS);
         Node partialTree = combineOrPrune(trees);
         partialTree = refineTree(data, partialTree, new ArrayList<>(attributes));
         partialTree = perfect(data, partialTree, new ArrayList<>(attributes));
@@ -168,38 +168,27 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
 
         double estImp = impFunc.computeImpurity(left.toArray(new Article[0]), right.toArray(new Article[0]));
 
-        for(Attribute a : attributes) { //TODO: parallel stream
-            if (data[0].getData()[a.getIndex()] instanceof Boolean) {
-                if (bestSplitBool(data, a)[0] < estImp)
-                    return null;
-            } else {
-                for (double split : getBuckets(data, a, estImp))
-                    if (impurityOfSplit(data, a, split) < estImp)
-                        return null;
-            }
-        }
-
         // Find out if we had any failures
-//        ArrayList<Callable<Boolean>> failures = new ArrayList<>(attributes.size());
-//        for(Attribute a : attributes){
-//            failures.add(() -> {
-//                if (data[0].getData()[a.getIndex()] instanceof Boolean) {
-//                    if (bestSplitBool(data, a)[0] < estImp)
-//                        return true;
-//                } else {
-//                    for (double split : getBuckets(data, a, estImp))
-//                        if (impurityOfSplit(data, a, split) < estImp)
-//                            return true;
-//                }
-//                return false;
-//            });
-//        }
-//        try {
-//            if(pool.invokeAny(failures))
-//                return null;
-//        } catch(Exception e){
-//            e.printStackTrace();
-//        }
+        ArrayList<Callable<Boolean>> failures = new ArrayList<>(attributes.size());
+        for(Attribute a : attributes){
+            failures.add(() -> {
+                if (data[0].getData()[a.getIndex()] instanceof Boolean) {
+                    if (bestSplitBool(data, a)[0] < estImp)
+                        return true;
+                } else {
+                    for (double split : getBuckets(data, a, estImp))
+                        if (impurityOfSplit(data, a, split) < estImp)
+                            return true;
+                }
+                return false;
+            });
+        }
+        try {
+            if(pool.invokeAny(failures))
+                return null;
+        } catch(Exception e){
+            e.printStackTrace();
+        }
         attributes.remove(node.getSplitAttribute());
         node.setLeftChild(
                 perfect(left.toArray(new Article[0]),
@@ -247,15 +236,24 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
     }
 
     private double getExactSplit(Article[] data, Attribute attribute, double[] range){
+
+        ArrayList<ForkJoinTask<double[]>> bests = new ArrayList<>(range.length);
+        // Check each split point
+        for (double split : range)
+            bests.add(pool.submit(() -> new double[]{impurityOfSplit(data, attribute, split), split}));
+
+        // Return best split point
         double bestSplit = Double.NaN;
         double bestImp = Double.POSITIVE_INFINITY;
-
-        // Check each split point for best
-        for (double split : range) {
-            double currentImp = impurityOfSplit(data, attribute, split);
-            if (currentImp < bestImp) {
-                bestImp = currentImp;
-                bestSplit = split;
+        for( ForkJoinTask<double[]> task : bests){
+            try{
+                double currentImp = task.get()[0];
+                if (currentImp < bestImp) {
+                    bestImp = currentImp;
+                    bestSplit = task.get()[1];
+                }
+            } catch(Exception e){
+                e.printStackTrace();
             }
         }
         return bestSplit;
