@@ -189,6 +189,7 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         } catch(Exception e){
             e.printStackTrace();
         }
+
         attributes.remove(node.getSplitAttribute());
         node.setLeftChild(
                 perfect(left.toArray(new Article[0]),
@@ -203,6 +204,8 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         return node;
     }
 
+    // Refines a confidence node into an internal node
+    // Also split the data based on this point
     private InternalNode refineNode(Article data[], ConfidenceNode n, ArrayList<Article> left, ArrayList<Article> right){
         ArrayList<Article> mid = new ArrayList<>();
         Attribute att = n.getSplitAttribute();
@@ -223,6 +226,8 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         return exact;
     }
 
+    // Split data into 3 parts, left of the confidence interval, right of the interval, and inside the interval
+    // The confidence interval is defined by splitPoint +/- conf
     protected void splitData(Article[] data, ArrayList<Article> left, ArrayList<Article> right, ArrayList<Article> middle, Attribute attribute, double splitPoint, double conf) {
         if (Double.isNaN(splitPoint)) throw new RuntimeException("No confidence interval for booleans");
         for (Article article : data) {
@@ -235,6 +240,7 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         }
     }
 
+    // Compute the exact splitting point by looking at all points in the confidence interval
     private double getExactSplit(Article[] data, Attribute attribute, double[] range){
 
         ArrayList<ForkJoinTask<double[]>> bests = new ArrayList<>(range.length);
@@ -259,6 +265,7 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         return bestSplit;
     }
 
+    // Helper method to split data and calculate the resulting impurity
     private double impurityOfSplit(Article[] data, Attribute attribute, double splitPoint){
         ArrayList<Article> left = new ArrayList<>();
         ArrayList<Article> right = new ArrayList<>();
@@ -270,6 +277,10 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
      * 3.4 How To Detect Failure
      *****************************/
 
+    // If a node is null, rerun the decision tree algorithm starting at this node
+    // Otherwise recurse on children
+    // Eventually this should give us a tree with proper leaf nodes and no null
+    // paths without a classification
     private Node perfect(Article[] data, Node n, ArrayList<Attribute> attributes){
         while(n == null)
             n = generateBootStrapDecisionTree(data,  attributes);
@@ -285,28 +296,40 @@ public class BootStrapTreeBuilder extends DecisionTreeBuilder {
         return node;
     }
 
+    // Discretization function
+    // Transforms the "continuous" space of a numerical attribute into a discrete
+    // step function of buckets
+    // Since data is not truly continuous, this is really just grouping a bunch of
+    // data points into a single bucket point
+    // It works by increasing bucket size when we are far from `estImp`, and
+    // making bucket boundaries and reducing bucket size when we get closer
+    // This means our step function will have coarse buckets far from `estImp`
+    // and finer buckets close to `estImp`. This is ideal as we need precision
+    // around `estImp`, and don't want to accidentally overshoot it.
     private Set<Double> getBuckets(Article[] data, Attribute attribute, double estImp){
         Set<Double> buckets = new HashSet<>();
         Arrays.sort(data, new CompareByAttribute(attribute));
+        int minBuckets = 10;
+        int maxBuckets = 100;
         double tolerance = .01;
-        for(int i = 1, j=data.length/100; i < data.length; j++, i+=j) {
+        for(int i = 1, j=data.length/maxBuckets; i < data.length; j++, i+=j) {
             Article[] left = Arrays.copyOfRange(data, 0, i);
             Article[] right = Arrays.copyOfRange(data, i, data.length);
             double currentImp = impFunc.computeImpurity(left, right);
-            if(currentImp > estImp+tolerance) {
-                j *= 1.5;
-                tolerance*=1.2;
-                j = j < 0 ? 1+data.length/10: j; //handle overflow
-                if(j > data.length/10){
-                    j = data.length/10;
-                    buckets.add(getDouble(data[i], attribute));
+            if(currentImp > estImp+tolerance) { // we are far away
+                j *= 1.5; // jump further
+                tolerance*=1.2; // increase requirement to increase jump
+                j = j < 0 ? 1+data.length/minBuckets: j; //handle overflow
+                if(j > data.length/minBuckets){ // make sure we don't have too few buckets
+                    j = data.length/minBuckets;
+                    buckets.add(getDouble(data[i], attribute)); // new bucket
                 }
             }
             else {
-                j /= 1.5;
-                tolerance /= 1.2;
-                j = Math.max(data.length/100, j);
-                buckets.add(getDouble(data[i], attribute));
+                j /= 1.5; // jump shorter
+                tolerance /= 1.2; // increase requirement to reduce jump (reduce requirement to increase jump)
+                j = Math.max(data.length/100, j); // make sure we don't have too many buckets
+                buckets.add(getDouble(data[i], attribute)); // new bucket
             }
         }
         return buckets;
