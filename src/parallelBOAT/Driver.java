@@ -38,7 +38,7 @@ public class Driver {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if(br != null) {
+            if (br != null) {
                 try {
                     br.close();
                 } catch (IOException e) {
@@ -47,25 +47,6 @@ public class Driver {
 
             }
         }
-
-//        DecisionTreeBuilder.generateDecisionTree(rawData);
-
-
-//        BootStrapTreeBuilder b = new BootStrapTreeBuilder(rawData, imp, 2, 2000);
-//        b.generateDecisionTree();
-
-
-
-
-
-        //Willie's testing
-
-//        System.out.println(rawData[0].getData()[Attribute.weekday_is_friday.getIndex()].toString());
-//        System.out.println(rawData[0].isWeekday_is_monday());
-
-//        System.out.println(rawData[0].getShares());
-////        Arrays.sort(rawData, new CompareByAttribute(Attribute.shares));
-//        System.out.println(rawData[0].getShares());
 
         // is equal testing:
 //        Article[] aData = Arrays.copyOfRange(rawData, 0, 100);
@@ -79,31 +60,40 @@ public class Driver {
 
         int classifySize = rawData.length / 4;
         randomizeData(classifySize, rawData);
-        Article[] trainingData = Arrays.copyOfRange(rawData, 0, rawData.length - classifySize);
+        Article[] trainingDataOrig = Arrays.copyOfRange(rawData, 0, rawData.length - classifySize);
+        Article[] trainingDataBoat = Arrays.copyOfRange(rawData, 0, rawData.length - classifySize);
         Article[] classifyData = Arrays.copyOfRange(rawData,rawData.length - classifySize, rawData.length);
-        DecisionTreeBuilder b = new DecisionTreeBuilder(trainingData, chooseImpurityFunction());
-        long startTime = System.currentTimeMillis();
-        b.generateDecisionTree();
-        long endTime = System.currentTimeMillis();
+        DecisionTreeBuilder original = new DecisionTreeBuilder(trainingDataOrig, imp);
+        BootStrapTreeBuilder boat = new BootStrapTreeBuilder(trainingDataBoat, imp, 5, 2000);
 
-        System.out.println("DONE");
+        long startTimeOrig = System.currentTimeMillis();
+        original.generateDecisionTree();
+        long endTimeOrig = System.currentTimeMillis();
 
+        long startTimeBoat = System.currentTimeMillis();
+        boat.generateDecisionTree();
+        long endTimeBoat = System.currentTimeMillis();
 
-        int correct = 0;
+        int correctOrig = 0;
+        int correctBoat = 0;
         for( Article a : classifyData) {
-            Popularity test = b.classify(a);
-            if(test == a.getPopularity())
-                correct++;
-//            System.out.print("ACTUAL: " + rawData[20000 + i].getPopularity());
-//            System.out.println(", CLASSIFIED: " + test);
+            Popularity testOrig = original.classify(a);
+            Popularity testBoat = boat.classify(a);
+            if(testOrig == a.getPopularity())
+                correctOrig++;
+            if(testBoat == a.getPopularity())
+                correctBoat++;
         }
 
-        double accuracy = (double) correct / (double) classifyData.length;
-        System.out.println("Accuracy: " + accuracy);
-        System.out.println("Build time (s): " + ((endTime - startTime) / 1000));
-
+        double accuracyOrig = (double) correctOrig / (double) classifyData.length;
+        double accuracyBoat = (double) correctBoat / (double) classifyData.length;
+        System.out.println("Accuracy Original: " + accuracyOrig);
+        System.out.println("Accuracy Boat: " + accuracyBoat);
+        System.out.println("Build time Original (s): " + ((endTimeOrig - startTimeOrig) / 1000));
+        System.out.println("Build time Boat (s): " + ((endTimeBoat - startTimeBoat) / 1000));
     }
 
+    // Randomly select the data that will be used in classification, and separate it at the end from the training data
     private static void randomizeData(int sampleSize, Article[] rawData) {
         Random rand = new Random();
         for(int i = 1; i < sampleSize + 1; i++) {
